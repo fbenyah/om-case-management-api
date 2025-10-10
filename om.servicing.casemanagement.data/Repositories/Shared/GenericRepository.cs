@@ -46,13 +46,13 @@ public class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
         await _context.SaveChangesAsync();
     }
 
-    public async Task Update(TEntity entity)
+    public async Task UpdateAsync(TEntity entity)
     {
         _dbSet.Update(entity);
         await _context.SaveChangesAsync();
     }
 
-    public async Task Remove(TEntity entity)
+    public async Task RemoveAsync(TEntity entity)
     {
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync();

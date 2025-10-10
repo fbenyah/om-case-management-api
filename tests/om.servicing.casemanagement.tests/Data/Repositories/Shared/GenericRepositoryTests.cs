@@ -54,27 +54,27 @@ public class GenericRepositoryTests
     }
 
     [Fact]
-    public async Task Update_UpdatesEntity()
+    public async Task UpdateAsync_UpdatesEntity()
     {
         var repo = CreateRepository();
         var entity = new TestEntity { Name = "Old" };
         await repo.AddAsync(entity);
 
         entity.Name = "New";
-        repo.Update(entity);
+        await repo.UpdateAsync(entity);
 
         var result = await repo.GetByIdAsync(entity.Id);
         Assert.Equal("New", result!.Name);
     }
 
     [Fact]
-    public async Task Remove_RemovesEntity()
+    public async Task RemoveAsync_RemovesEntity()
     {
         var repo = CreateRepository();
         var entity = new TestEntity { Name = "ToRemove" };
         await repo.AddAsync(entity);
 
-        repo.Remove(entity);
+        await repo.RemoveAsync(entity);
 
         var result = await repo.GetAllAsync();
         Assert.Empty(result);
