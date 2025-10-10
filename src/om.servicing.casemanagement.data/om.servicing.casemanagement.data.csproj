@@ -15,11 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\om.servicing.casemanagement.domain\om.servicing.casemanagement.domain.csproj" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <ProjectReference Include="..\om.servicing.casemanagement.domain\om.servicing.casemanagement.domain.csproj" />
   </ItemGroup>
 
 </Project>
