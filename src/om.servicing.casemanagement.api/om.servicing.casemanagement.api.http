@@ -1,0 +1,6 @@
+@om.servicing.casemanagement.api_HostAddress = http://localhost:5197
+
+GET {{om.servicing.casemanagement.api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
