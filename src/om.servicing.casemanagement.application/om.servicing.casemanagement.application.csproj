@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\om.servicing.casemanagement.data\om.servicing.casemanagement.data.csproj" />
+    <ProjectReference Include="..\om.servicing.casemanagement.domain\om.servicing.casemanagement.domain.csproj" />
+  </ItemGroup>
+
 </Project>

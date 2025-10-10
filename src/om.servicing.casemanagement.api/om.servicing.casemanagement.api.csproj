@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\om.servicing.casemanagement.application\om.servicing.casemanagement.application.csproj" />
     <ProjectReference Include="..\om.servicing.casemanagement.data\om.servicing.casemanagement.data.csproj" />
     <ProjectReference Include="..\om.servicing.casemanagement.domain\om.servicing.casemanagement.domain.csproj" />
   </ItemGroup>
