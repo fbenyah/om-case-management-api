@@ -1,4 +1,5 @@
 using om.servicing.casemanagement.data;
+using om.servicing.casemanagement.application;
 
 namespace om.servicing.casemanagement.api
 {
@@ -16,6 +17,7 @@ namespace om.servicing.casemanagement.api
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddCaseManagementDataPostgres(builder.Configuration);
+            builder.Services.RegisterCustomServices();
 
             var app = builder.Build();
 
