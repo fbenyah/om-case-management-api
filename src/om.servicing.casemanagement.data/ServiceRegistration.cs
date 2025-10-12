@@ -36,6 +36,14 @@ public static class ServiceRegistration
         return services;
     }
 
+    /// <summary>
+    /// Registers a scoped generic repository for the specified entity type in the service collection.
+    /// </summary>
+    /// <remarks>This method registers an implementation of <see cref="IGenericRepository{T}"/> that uses 
+    /// <see cref="CaseManagerContext"/> as the database context. The repository is registered with  a scoped lifetime,
+    /// meaning a new instance will be created for each request.</remarks>
+    /// <typeparam name="T">The type of the entity for which the repository is being registered. Must be a reference type.</typeparam>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the repository will be added.</param>
     private static void RegisterRepositories<T>(this IServiceCollection services) where T : class
     {
         services.AddScoped<IGenericRepository<T>>(provider =>
