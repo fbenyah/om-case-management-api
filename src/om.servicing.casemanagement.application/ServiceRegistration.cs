@@ -1,8 +1,11 @@
 ﻿using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using om.servicing.casemanagement.application.Features.Configuration;
 using om.servicing.casemanagement.application.Services;
+using OM.RequestFramework.Clients;
+using OM.RequestFramework.Infrastructure.Common.Config;
 
 namespace om.servicing.casemanagement.application;
 
@@ -17,9 +20,16 @@ public static class ServiceRegistration
     }
 
     public static IServiceCollection RegisterCustomServices(this IServiceCollection services)
-    {
-        // Register application services here
-        services.AddScoped<IOMCaseService, OMCaseService>();
+    {        
+        services
+            // Register shared services here (SAE Request Framework)
+            .AddApplicationLogging()
+            .AddTransient<CircuitBreakerAndRetryHandler>()
+            .AddTransient<IHttpMessageHandlerBuilderFilter, CustomMessageHandlerBuilderFilter>()
+
+
+            // Register application services here
+            .AddScoped<IOMCaseService, OMCaseService>();
 
         return services;
     }
