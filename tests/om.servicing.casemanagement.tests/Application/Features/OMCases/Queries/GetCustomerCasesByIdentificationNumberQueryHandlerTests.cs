@@ -11,7 +11,8 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
     public async Task Handle_ReturnsErrorResponse_WhenIdentificationNumberIsNullOrWhitespace()
     {
         var caseServiceMock = new Mock<IOMCaseService>();
-        var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(caseServiceMock.Object);
+        var loggingServiceMock = new Mock<OM.RequestFramework.Core.Logging.ILoggingService>();
+        var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(loggingServiceMock.Object, caseServiceMock.Object);
 
         var query = new GetCustomerCasesByIdentificationNumberQuery { IdentificationNumber = "   " };
         var result = await handler.Handle(query, CancellationToken.None);
@@ -27,6 +28,7 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
     public async Task Handle_ReturnsCases_WhenIdentificationNumberIsValid()
     {
         var caseServiceMock = new Mock<IOMCaseService>();
+        var loggingServiceMock = new Mock<OM.RequestFramework.Core.Logging.ILoggingService>();
         var cases = new List<OMCaseDto>
         {
             new OMCaseDto { Channel = "Email", IdentificationNumber = "123", Status = "Open" },
@@ -34,7 +36,7 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
         };
         caseServiceMock.Setup(s => s.GetCasesForCustomer("123")).ReturnsAsync(cases);
 
-        var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(caseServiceMock.Object);
+        var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(loggingServiceMock.Object, caseServiceMock.Object);
         var query = new GetCustomerCasesByIdentificationNumberQuery { IdentificationNumber = "123" };
 
         var result = await handler.Handle(query, CancellationToken.None);
@@ -52,9 +54,10 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
     public async Task Handle_ReturnsEmptyList_WhenNoCasesFound()
     {
         var caseServiceMock = new Mock<IOMCaseService>();
+        var loggingServiceMock = new Mock<OM.RequestFramework.Core.Logging.ILoggingService>();
         caseServiceMock.Setup(s => s.GetCasesForCustomer("456")).ReturnsAsync(new List<OMCaseDto>());
 
-        var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(caseServiceMock.Object);
+        var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(loggingServiceMock.Object, caseServiceMock.Object);
         var query = new GetCustomerCasesByIdentificationNumberQuery { IdentificationNumber = "456" };
 
         var result = await handler.Handle(query, CancellationToken.None);
