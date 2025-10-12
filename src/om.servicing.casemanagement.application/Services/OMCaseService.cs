@@ -14,6 +14,13 @@ public class OMCaseService : IOMCaseService
         _caseRepository = caseRepository;
     }
 
+    /// <summary>
+    /// Retrieves a list of cases associated with the specified customer identity number.
+    /// </summary>
+    /// <param name="identityNumber">The identity number of the customer whose cases are to be retrieved.  Cannot be null, empty, or consist only of
+    /// whitespace.</param>
+    /// <returns>A list of <see cref="OMCaseDto"/> objects representing the cases associated with the specified identity number. 
+    /// Returns an empty list if the identity number is null, empty, or no cases are found.</returns>
     public async Task<List<OMCaseDto>> GetCasesForCustomer(string identityNumber)
     {
         if (string.IsNullOrWhiteSpace(identityNumber))
@@ -26,6 +33,16 @@ public class OMCaseService : IOMCaseService
         return OMCaseUtilities.ReturnCaseDtoList(omCases);
     }
 
+    /// <summary>
+    /// Retrieves a list of cases for a specific customer based on their identity number and case status.
+    /// </summary>
+    /// <remarks>This method queries the case repository to find cases that match the specified criteria and
+    /// converts them into DTOs for external use. Ensure that both <paramref name="identityNumber"/> and <paramref
+    /// name="status"/> are valid non-empty strings before calling this method.</remarks>
+    /// <param name="identityNumber">The identity number of the customer. This value cannot be null, empty, or consist only of whitespace.</param>
+    /// <param name="status">The status of the cases to retrieve. This value cannot be null, empty, or consist only of whitespace.</param>
+    /// <returns>A list of <see cref="OMCaseDto"/> objects representing the cases that match the specified identity number and
+    /// status. Returns an empty list if no matching cases are found or if the input parameters are invalid.</returns>
     public async Task<List<OMCaseDto>> GetCasesForCustomerByStatusAsync(string identityNumber, string status)
     {
         if (string.IsNullOrWhiteSpace(identityNumber)
