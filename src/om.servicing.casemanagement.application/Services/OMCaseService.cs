@@ -1,7 +1,7 @@
-﻿using om.servicing.casemanagement.data.Repositories.Shared;
+﻿using om.servicing.casemanagement.application.Utilities;
+using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
-using om.servicing.casemanagement.domain.Mappings;
 
 namespace om.servicing.casemanagement.application.Services;
 
@@ -23,7 +23,7 @@ public class OMCaseService : IOMCaseService
 
         IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.IdentificationNumber == identityNumber);
 
-        return ReturnCaseListDto(omCases);
+        return OMCaseUtilities.ReturnCaseDtoList(omCases);
     }
 
     public async Task<List<OMCaseDto>> GetCasesForCustomerByStatusAsync(string identityNumber, string status)
@@ -36,23 +36,6 @@ public class OMCaseService : IOMCaseService
 
         IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.IdentificationNumber == identityNumber);
 
-        return ReturnCaseListDto(omCases);
-    }
-
-    private List<OMCaseDto> ReturnCaseListDto(IEnumerable<OMCase> omCases)
-    {
-        List<OMCaseDto> caseListDto = new List<OMCaseDto>();
-
-        if (omCases == null || !omCases.Any())
-        {
-            return caseListDto;
-        }
-
-        foreach (OMCase omCase in omCases)
-        {
-            caseListDto.Add(EntityToDtoMapper.ToDto(omCase));
-        }
-
-        return caseListDto;
+        return OMCaseUtilities.ReturnCaseDtoList(omCases);
     }
 }
