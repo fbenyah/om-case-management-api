@@ -9,6 +9,7 @@
 public class OMCaseDto : BaseDtoWithStatus
 {
     public string Channel { get; set; } = string.Empty;
+    public string IdentificationNumber { get; set; } = string.Empty;
 
     public List<OMInteractionDto>? Interactions { get; set; } = null;
 }

@@ -27,6 +27,7 @@ public static class EntityToDtoMapper
         CreatedDate = entity.CreatedDate,
         UpdateDate = entity.UpdateDate,
         Status = entity.Status,
+        IdentificationNumber = entity.IdentificationNumber,
         Interactions = entity.Interactions?.Select(i => ToDto(i)).ToList() ?? new List<OMInteractionDto>()
     };
 

@@ -28,6 +28,7 @@ public static class DtoToEntityMapper
         CreatedDate = dto.CreatedDate != null ? Convert.ToDateTime(dto.CreatedDate) : DateTime.MinValue,
         UpdateDate = dto.UpdateDate != null ? Convert.ToDateTime(dto.UpdateDate) : DateTime.MinValue,
         Status = dto.Status,
+        IdentificationNumber = dto.IdentificationNumber,
         Interactions = dto.Interactions?.Select(i => ToEntity(i)).ToList() ?? new List<OMInteraction>()
     };
 
