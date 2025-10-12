@@ -16,8 +16,10 @@ namespace om.servicing.casemanagement.api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddCaseManagementDataPostgres(builder.Configuration);
-            builder.Services.RegisterCustomServices();
+            builder.Services
+                .AddCaseManagementDataPostgres(builder.Configuration)
+                .RegisterApplicationFeatures()
+                .RegisterCustomServices();
 
             var app = builder.Build();
 
