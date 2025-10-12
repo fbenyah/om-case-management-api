@@ -20,11 +20,11 @@ public class GetCustomerCasesByIdentificationNumberResponse : ApplicationBaseRes
 public class GetCustomerCasesByIdentificationNumberQueryHandler : IRequestHandler<GetCustomerCasesByIdentificationNumberQuery, GetCustomerCasesByIdentificationNumberResponse>
 {
     private readonly Services.IOMCaseService _caseService;
+
     public GetCustomerCasesByIdentificationNumberQueryHandler(Services.IOMCaseService caseService)
     {
         _caseService = caseService;
     }
-
 
     public async Task<GetCustomerCasesByIdentificationNumberResponse> Handle(GetCustomerCasesByIdentificationNumberQuery request, CancellationToken cancellationToken)
     {
