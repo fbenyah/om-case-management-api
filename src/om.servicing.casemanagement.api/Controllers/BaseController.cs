@@ -8,7 +8,7 @@ using OM.RequestFramework.Core.Logging;
 namespace om.servicing.casemanagement.api.Controllers;
 
 [ApiController]
-public class BaseController : ControllerBase
+public abstract class BaseController : ControllerBase
 {
     private IMediator _mediator;
     private ILoggingService _loggingService;
