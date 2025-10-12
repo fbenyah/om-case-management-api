@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using om.servicing.casemanagement.domain.Responses.Shared;
 using OM.RequestFramework.Core.Exceptions;
+using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.application.Features.OMCases.Queries;
 
@@ -17,11 +18,16 @@ public class GetCustomerCasesByIdentificationNumberResponse : ApplicationBaseRes
     }
 }
 
-public class GetCustomerCasesByIdentificationNumberQueryHandler : IRequestHandler<GetCustomerCasesByIdentificationNumberQuery, GetCustomerCasesByIdentificationNumberResponse>
+public class GetCustomerCasesByIdentificationNumberQueryHandler : SharedFeatures, IRequestHandler<GetCustomerCasesByIdentificationNumberQuery, GetCustomerCasesByIdentificationNumberResponse>
 {
     private readonly Services.IOMCaseService _caseService;
 
-    public GetCustomerCasesByIdentificationNumberQueryHandler(Services.IOMCaseService caseService)
+    public GetCustomerCasesByIdentificationNumberQueryHandler
+        (
+            ILoggingService loggingService,
+            Services.IOMCaseService caseService
+        )
+        : base(loggingService)
     {
         _caseService = caseService;
     }
