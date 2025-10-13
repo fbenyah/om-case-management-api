@@ -8,7 +8,7 @@ using om.servicing.casemanagement.application.Features.OMCases.Queries;
 namespace om.servicing.casemanagement.tests.Api.Controllers.V1;
 
 public class CaseContollerTests
-{    
+{
     [Fact]
     public async Task GetCustomerCasesByIdentification_ReturnsOk_WhenResponseIsSuccessful()
     {
@@ -71,6 +71,71 @@ public class CaseContollerTests
         // Assert
         mediatorMock.Verify(m => m.Send(
             It.Is<GetCustomerCasesByIdentificationNumberQuery>(q => q.IdentificationNumber == "ABC123"),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetCustomerCasesByIdentificationAndStatus_ReturnsOk_WhenResponseIsSuccessful()
+    {
+        // Arrange
+        var mediatorMock = new Mock<IMediator>();
+        var response = new GetCustomerCasesByIdentificationNumberAndStatusResponse { };
+        mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetCustomerCasesByIdentificationNumberAndStatusQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
+
+        var controller = CreateControllerWithMediator(mediatorMock);
+
+        // Act
+        var result = await controller.GetCustomerCasesByIdentificationAndStatus("source", "123", "Open");
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, okResult.StatusCode);
+        Assert.Equal(response, okResult.Value);
+    }
+
+    [Fact]
+    public async Task GetCustomerCasesByIdentificationAndStatus_ReturnsBadRequest_WhenResponseIsNotSuccessful()
+    {
+        // Arrange
+        var mediatorMock = new Mock<IMediator>();
+        var response = new GetCustomerCasesByIdentificationNumberAndStatusResponse { };
+        response.SetOrUpdateErrorMessage("Error occurred");
+
+        mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetCustomerCasesByIdentificationNumberAndStatusQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
+
+        var controller = CreateControllerWithMediator(mediatorMock);
+
+        // Act
+        var result = await controller.GetCustomerCasesByIdentificationAndStatus("source", "123", "Open");
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequestResult.StatusCode);
+        Assert.Equal(response, badRequestResult.Value);
+    }
+
+    [Fact]
+    public async Task GetCustomerCasesByIdentificationAndStatus_PassesCorrectQueryToMediator()
+    {
+        // Arrange
+        var mediatorMock = new Mock<IMediator>();
+        var response = new GetCustomerCasesByIdentificationNumberAndStatusResponse { };
+        mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetCustomerCasesByIdentificationNumberAndStatusQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
+
+        var controller = CreateControllerWithMediator(mediatorMock);
+
+        // Act
+        await controller.GetCustomerCasesByIdentificationAndStatus("source", "ABC123", "Closed");
+
+        // Assert
+        mediatorMock.Verify(m => m.Send(
+            It.Is<GetCustomerCasesByIdentificationNumberAndStatusQuery>(q => q.IdentificationNumber == "ABC123" && q.Status == "Closed"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

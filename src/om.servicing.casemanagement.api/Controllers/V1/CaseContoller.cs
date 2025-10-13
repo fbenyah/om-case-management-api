@@ -34,4 +34,30 @@ public class CaseContoller : BaseController
 
         return HandleApplicationEnterpriseResponse<GetCustomerCasesByIdentificationNumberResponse>(response);
     }
+
+    [SwaggerOperation(
+        Summary = "Customer cases by indentification number and case status.",
+        Description = @"This request gets all customer cases given a particular status and the identification number linked to that case.")]
+    [HttpGet]
+    [Route("by/identification/{identificationNumber}/status/{status}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(BaseFluentValidationError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> GetCustomerCasesByIdentificationAndStatus(
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] string sourceSystem,
+        string identificationNumber,
+        string status)
+    {
+        GetCustomerCasesByIdentificationNumberAndStatusResponse response = await Mediator.Send(new GetCustomerCasesByIdentificationNumberAndStatusQuery
+        {
+            IdentificationNumber = identificationNumber,
+            Status = status
+        });
+
+        return HandleApplicationEnterpriseResponse<GetCustomerCasesByIdentificationNumberAndStatusResponse>(response);
+    }
 }
