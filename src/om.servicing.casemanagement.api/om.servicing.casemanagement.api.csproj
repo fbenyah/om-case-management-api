@@ -14,8 +14,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 	<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
 	<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />
-	<PackageReference Include="OM.RequestFramework.Infrastructure.Common" Version="1.2.0-alpha-81562" />
-	<PackageReference Include="OM.RequestFramework.Infrastructure.Web" Version="1.2.0-alpha-81562" />
+	<PackageReference Include="OM.RequestFramework.Infrastructure.Common" Version="1.2.0-alpha-105151" />
+	<PackageReference Include="OM.RequestFramework.Infrastructure.Web" Version="1.2.0-alpha-105151" />
   </ItemGroup>
 
   <ItemGroup>

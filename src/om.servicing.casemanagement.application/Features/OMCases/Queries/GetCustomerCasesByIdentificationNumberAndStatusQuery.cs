@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Responses.Shared;
 using OM.RequestFramework.Core.Exceptions;
 using OM.RequestFramework.Core.Logging;
@@ -78,8 +79,16 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandler : Share
             return response;
         }
 
-        List<domain.Dtos.OMCaseDto> customerCases = await _caseService.GetCasesForCustomerByStatusAsync(request.IdentificationNumber, request.Status);
-        response.Data = customerCases;
+        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAndStatusAsync(request.IdentificationNumber, request.Status);
+        
+        if (!omCaseListResponse.Success)
+        {
+            response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
+            response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
+            return response;
+        }
+
+        response.Data = omCaseListResponse.Data;
 
         return response;
     }

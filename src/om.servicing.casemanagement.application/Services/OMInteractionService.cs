@@ -1,4 +1,5 @@
-﻿using om.servicing.casemanagement.application.Utilities;
+﻿using om.servicing.casemanagement.application.Services.Models;
+using om.servicing.casemanagement.application.Utilities;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
@@ -57,16 +58,21 @@ public class OMInteractionService : IOMInteractionService
             return new List<OMInteractionDto>();
         }
 
-        List<OMCaseDto> omCasesDto = await _omCaseService.GetCasesForCustomer(customerIdentificationNumber);
+        OMCaseListResponse omCaseListResponse = await _omCaseService.GetCasesForCustomerByIdentificationNumberAsync(customerIdentificationNumber);
 
-        if (omCasesDto == null || !omCasesDto.Any())
+        if (!omCaseListResponse.Success)
+        {
+            return new List<OMInteractionDto>();
+        }
+
+        if (omCaseListResponse.Data == null || !omCaseListResponse.Data.Any())
         {
             return new List<OMInteractionDto>();
         }
 
         List<OMInteractionDto> allInteractionsDto = new();
 
-        foreach (OMCaseDto omCaseDto in omCasesDto)
+        foreach (OMCaseDto omCaseDto in omCaseListResponse.Data)
         {
             if (omCaseDto.Interactions != null && omCaseDto.Interactions.Any())
             {

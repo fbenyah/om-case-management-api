@@ -4,7 +4,7 @@ namespace om.servicing.casemanagement.application.Services;
 
 public abstract class BaseService
 {
-    private readonly ILoggingService _loggingService;
+    protected readonly ILoggingService _loggingService;
 
     public BaseService(ILoggingService loggingService)
     {
