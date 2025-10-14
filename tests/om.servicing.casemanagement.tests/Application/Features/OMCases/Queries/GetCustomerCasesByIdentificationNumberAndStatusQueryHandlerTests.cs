@@ -1,6 +1,7 @@
 ﻿using Moq;
 using om.servicing.casemanagement.application.Features.OMCases.Queries;
 using om.servicing.casemanagement.application.Services;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Dtos;
 using OM.RequestFramework.Core.Logging;
 
@@ -57,13 +58,16 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
     [Fact]
     public async Task Handle_ReturnsCases_WhenInputIsValid()
     {
-        var cases = new List<OMCaseDto>
+        var cases = new OMCaseListResponse
         {
-            new OMCaseDto { IdentificationNumber = "123456", ReferenceNumber = "ref1234", Status = "Open", Channel = "Web" }
+            Data = new List<OMCaseDto>
+            {
+                new OMCaseDto { IdentificationNumber = "123456", ReferenceNumber = "ref1234", Status = "Open", Channel = "Web" }
+            }
         };
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByStatusAsync("123456", "Open"))
+            .Setup(s => s.GetCasesForCustomerByReferenceNumberAndStatusAsync("123456", "Open"))
             .ReturnsAsync(cases);
 
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
@@ -76,15 +80,15 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
 
         Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages);
-        Assert.Equal(cases, result.Data);
+        Assert.Equal(cases.Data, result.Data);
     }
 
     [Fact]
     public async Task Handle_ReturnsEmptyList_WhenServiceReturnsNoCases()
     {
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByStatusAsync("123456", "Closed"))
-            .ReturnsAsync(new List<OMCaseDto>());
+            .Setup(s => s.GetCasesForCustomerByReferenceNumberAndStatusAsync("123456", "Closed"))
+            .ReturnsAsync(new OMCaseListResponse());
 
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {

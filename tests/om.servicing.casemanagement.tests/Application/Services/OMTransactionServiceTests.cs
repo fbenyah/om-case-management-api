@@ -1,5 +1,6 @@
 ﻿using Moq;
 using om.servicing.casemanagement.application.Services;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
@@ -75,8 +76,8 @@ public class OMTransactionServiceTests
     [Fact]
     public async Task GetTransactionsForCaseByCustomerIdentificationAsync_NoCases_ReturnsEmptyList()
     {
-        _caseServiceMock.Setup(s => s.GetCasesForCustomer(It.IsAny<string>()))
-            .ReturnsAsync(new List<OMCaseDto>());
+        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()))
+            .ReturnsAsync(new OMCaseListResponse());
         var result = await _service.GetTransactionsForCaseByCustomerIdentificationAsync("cust123");
         Assert.Empty(result);
     }
@@ -84,8 +85,8 @@ public class OMTransactionServiceTests
     [Fact]
     public async Task GetTransactionsForCaseByCustomerIdentificationAsync_CasesWithNoTransactions_ReturnsEmptyList()
     {
-        _caseServiceMock.Setup(s => s.GetCasesForCustomer(It.IsAny<string>()))
-            .ReturnsAsync(new List<OMCaseDto> { new OMCaseDto { Channel = "Web", IdentificationNumber = "cust123" } });
+        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()))
+            .ReturnsAsync(new OMCaseListResponse { Data = new List<OMCaseDto> { new OMCaseDto { Channel = "Web", IdentificationNumber = "cust123" } } });
         _transactionRepoMock
             .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
             .ReturnsAsync(Enumerable.Empty<OMTransaction>());
@@ -96,12 +97,16 @@ public class OMTransactionServiceTests
     [Fact]
     public async Task GetTransactionsForCaseByCustomerIdentificationAsync_CasesWithTransactions_ReturnsAllDtos()
     {
-        var cases = new List<OMCaseDto>
+        var cases = new OMCaseListResponse
         {
-            new OMCaseDto { Channel = "Web", IdentificationNumber = "cust123", Status = "Open", Id = "case1" },
-            new OMCaseDto { Channel = "Phone", IdentificationNumber = "cust123", Status = "Closed", Id = "case2" }
+            Data = new List<OMCaseDto>
+            {
+                new OMCaseDto { Channel = "Web", IdentificationNumber = "cust123", Status = "Open", Id = "case1" },
+                new OMCaseDto { Channel = "Phone", IdentificationNumber = "cust123", Status = "Closed", Id = "case2" }
+            }
         };
-        _caseServiceMock.Setup(s => s.GetCasesForCustomer("cust123")).ReturnsAsync(cases);
+
+        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123")).ReturnsAsync(cases);
 
         _transactionRepoMock
             .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(expr => expr.Compile().Invoke(new OMTransaction { CaseId = "case1" }))))
@@ -115,7 +120,7 @@ public class OMTransactionServiceTests
         Assert.Equal(2, result.Count);
         Assert.Contains(result, t => t.ReceivedDetails == "R1" && t.ProcessedDetails == "P1");
         Assert.Contains(result, t => t.ReceivedDetails == "R2" && t.ProcessedDetails == "P2");
-        _caseServiceMock.Verify(s => s.GetCasesForCustomer("cust123"), Times.Once);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"), Times.Once);
     }
 
     [Fact]

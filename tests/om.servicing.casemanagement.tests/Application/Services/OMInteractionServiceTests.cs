@@ -1,5 +1,6 @@
 ﻿using Moq;
 using om.servicing.casemanagement.application.Services;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
@@ -69,32 +70,35 @@ public class OMInteractionServiceTests
     {
         var result = await _service.GetInteractionsForCaseByCustomerIdentificationAsync(customerId);
         Assert.Empty(result);
-        _mockCaseService.Verify(s => s.GetCasesForCustomer(It.IsAny<string>()), Times.Never);
+        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
     public async Task GetInteractionsForCaseByCustomerIdentificationAsync_ReturnsEmptyList_WhenNoCasesFound()
     {
         _mockCaseService
-            .Setup(s => s.GetCasesForCustomer(It.IsAny<string>()))
-            .ReturnsAsync(new List<OMCaseDto>());
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()))
+            .ReturnsAsync(new OMCaseListResponse());
 
         var result = await _service.GetInteractionsForCaseByCustomerIdentificationAsync("cust123");
         Assert.Empty(result);
-        _mockCaseService.Verify(s => s.GetCasesForCustomer("cust123"), Times.Once);
+        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"), Times.Once);
     }
 
     [Fact]
     public async Task GetInteractionsForCaseByCustomerIdentificationAsync_ReturnsAggregatedInteractions()
     {
-        var cases = new List<OMCaseDto>
+        var cases = new OMCaseListResponse
         {
-            new OMCaseDto { Channel = "Web", IdentificationNumber = "cust123", Status = "Open", Id = "case1" },
-            new OMCaseDto { Channel = "Phone", IdentificationNumber = "cust123", Status = "Closed", Id = "case2" }
+            Data = new List<OMCaseDto>
+            {
+                new OMCaseDto { Channel = "Web", IdentificationNumber = "cust123", Status = "Open", Id = "case1" },
+                new OMCaseDto { Channel = "Phone", IdentificationNumber = "cust123", Status = "Closed", Id = "case2" }
+            }
         };
 
         _mockCaseService
-            .Setup(s => s.GetCasesForCustomer("cust123"))
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"))
             .ReturnsAsync(cases);
 
         _mockInteractionRepo
@@ -109,6 +113,6 @@ public class OMInteractionServiceTests
         Assert.Equal(2, result.Count);
         Assert.Contains(result, i => i.Notes == "Note1");
         Assert.Contains(result, i => i.Notes == "Note2");
-        _mockCaseService.Verify(s => s.GetCasesForCustomer("cust123"), Times.Once);
+        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"), Times.Once);
     }
 }
