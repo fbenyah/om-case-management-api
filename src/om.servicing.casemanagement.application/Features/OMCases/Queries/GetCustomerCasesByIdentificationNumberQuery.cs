@@ -5,11 +5,22 @@ using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.application.Features.OMCases.Queries;
 
+/// <summary>
+/// Represents a query to retrieve customer cases associated with a specific identification number.
+/// </summary>
+/// <remarks>This query is used to fetch customer case data based on the provided identification number. The
+/// result of the query is returned as a <see cref="GetCustomerCasesByIdentificationNumberResponse"/>.</remarks>
 public class GetCustomerCasesByIdentificationNumberQuery : IRequest<GetCustomerCasesByIdentificationNumberResponse>
 {
     public string IdentificationNumber { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// Represents the response containing a list of customer cases associated with a specific identification number.
+/// </summary>
+/// <remarks>This response includes a collection of <see cref="domain.Dtos.OMCaseDto"/> objects, which provide
+/// detailed information about each case. The <see cref="Data"/> property is initialized to an empty list by
+/// default.</remarks>
 public class GetCustomerCasesByIdentificationNumberResponse : ApplicationBaseResponse<List<domain.Dtos.OMCaseDto>>, IResponse
 {
     public GetCustomerCasesByIdentificationNumberResponse()
@@ -18,6 +29,13 @@ public class GetCustomerCasesByIdentificationNumberResponse : ApplicationBaseRes
     }
 }
 
+/// <summary>
+/// Handles queries to retrieve customer cases based on an identification number.
+/// </summary>
+/// <remarks>This handler processes a <see cref="GetCustomerCasesByIdentificationNumberQuery"/> and returns a <see
+/// cref="GetCustomerCasesByIdentificationNumberResponse"/> containing the customer cases associated with the provided
+/// identification number. If the identification number is null or whitespace, an error message is set in the
+/// response.</remarks>
 public class GetCustomerCasesByIdentificationNumberQueryHandler : SharedFeatures, IRequestHandler<GetCustomerCasesByIdentificationNumberQuery, GetCustomerCasesByIdentificationNumberResponse>
 {
     private readonly Services.IOMCaseService _caseService;
