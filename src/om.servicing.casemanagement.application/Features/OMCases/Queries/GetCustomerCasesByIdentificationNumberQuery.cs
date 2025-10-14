@@ -50,6 +50,17 @@ public class GetCustomerCasesByIdentificationNumberQueryHandler : SharedFeatures
         _caseService = caseService;
     }
 
+    /// <summary>
+    /// Handles the query to retrieve customer cases based on the provided identification number.
+    /// </summary>
+    /// <remarks>The identification number provided in the query must not be null, empty, or consist only of
+    /// whitespace. If the identification number is invalid, the response will include an appropriate error
+    /// message.</remarks>
+    /// <param name="request">The query containing the identification number used to retrieve customer cases.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a <see
+    /// cref="GetCustomerCasesByIdentificationNumberResponse"/> with the list of customer cases if the identification
+    /// number is valid, or an error message if the identification number is missing or invalid.</returns>
     public async Task<GetCustomerCasesByIdentificationNumberResponse> Handle(GetCustomerCasesByIdentificationNumberQuery request, CancellationToken cancellationToken)
     {
         GetCustomerCasesByIdentificationNumberResponse response = new ();

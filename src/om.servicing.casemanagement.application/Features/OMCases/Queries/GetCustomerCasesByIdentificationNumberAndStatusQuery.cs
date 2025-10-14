@@ -50,6 +50,18 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandler : Share
         _caseService = caseService;
     }
 
+    /// <summary>
+    /// Handles the query to retrieve customer cases based on the provided identification number and case status.
+    /// </summary>
+    /// <remarks>This method validates the input parameters and retrieves the customer cases asynchronously.
+    /// If the identification number or status is missing or empty, the response will include an appropriate error
+    /// message.</remarks>
+    /// <param name="request">The query containing the identification number and case status used to filter the customer cases. Both
+    /// parameters must be non-empty strings.</param>
+    /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+    /// <returns>A <see cref="GetCustomerCasesByIdentificationNumberAndStatusResponse"/> containing the list of customer cases
+    /// that match the specified identification number and status. If the input parameters are invalid, the response
+    /// will include an error message.</returns>
     public async Task<GetCustomerCasesByIdentificationNumberAndStatusResponse> Handle(GetCustomerCasesByIdentificationNumberAndStatusQuery request, CancellationToken cancellationToken)
     {
         GetCustomerCasesByIdentificationNumberAndStatusResponse response = new();
