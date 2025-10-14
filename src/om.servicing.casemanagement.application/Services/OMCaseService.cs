@@ -2,14 +2,19 @@
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
+using om.servicing.casemanagement.domain.Mappings;
+using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.application.Services;
 
-public class OMCaseService : IOMCaseService
+public class OMCaseService : BaseService, IOMCaseService
 {
     private readonly IGenericRepository<OMCase> _caseRepository;
 
-    public OMCaseService(IGenericRepository<OMCase> caseRepository)
+    public OMCaseService(
+        ILoggingService loggingService,
+        IGenericRepository<OMCase> caseRepository        
+        ) : base(loggingService)
     {
         _caseRepository = caseRepository;
     }
@@ -54,5 +59,18 @@ public class OMCaseService : IOMCaseService
         IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.IdentificationNumber == identityNumber);
 
         return OMCaseUtilities.ReturnCaseDtoList(omCases);
+    }
+
+    // create a case
+    public async Task<bool> CreateCaseAsync(OMCaseDto omCaseDto)
+    {
+        if (omCaseDto == null)
+        {
+            return false;
+        }
+        OMCase omCase = DtoToEntityMapper.ToEntity(omCaseDto);
+
+        await _caseRepository.AddAsync(omCase);
+        return true;
     }
 }
