@@ -9,14 +9,16 @@ namespace om.servicing.casemanagement.tests.Application.Services;
 public class OMTransactionServiceTests
 {
     private readonly Mock<IOMCaseService> _caseServiceMock;
+    private readonly Mock<IOMInteractionService> _interactionServiceMock;
     private readonly Mock<IGenericRepository<OMTransaction>> _transactionRepoMock;
     private readonly OMTransactionService _service;
 
     public OMTransactionServiceTests()
     {
         _caseServiceMock = new Mock<IOMCaseService>();
+        _interactionServiceMock = new Mock<IOMInteractionService>();
         _transactionRepoMock = new Mock<IGenericRepository<OMTransaction>>();
-        _service = new OMTransactionService(_caseServiceMock.Object, _transactionRepoMock.Object);
+        _service = new OMTransactionService(_caseServiceMock.Object, _interactionServiceMock.Object, _transactionRepoMock.Object);
     }
 
     [Fact]
@@ -114,5 +116,111 @@ public class OMTransactionServiceTests
         Assert.Contains(result, t => t.ReceivedDetails == "R1" && t.ProcessedDetails == "P1");
         Assert.Contains(result, t => t.ReceivedDetails == "R2" && t.ProcessedDetails == "P2");
         _caseServiceMock.Verify(s => s.GetCasesForCustomer("cust123"), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetTransactionsForInteractionByCustomerIdentificationAsync_NullOrWhitespace_ReturnsEmptyList()
+    {
+        var result1 = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync(null);
+        var result2 = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("");
+        var result3 = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("   ");
+        Assert.Empty(result1);
+        Assert.Empty(result2);
+        Assert.Empty(result3);
+    }
+
+    [Fact]
+    public async Task GetTransactionsForInteractionByCustomerIdentificationAsync_NoInteractions_ReturnsEmptyList()
+    {
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync(It.IsAny<string>()))
+            .ReturnsAsync(new List<OMInteractionDto>());
+        var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123");
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetTransactionsForInteractionByCustomerIdentificationAsync_InteractionsWithTransactions_ReturnsAllDtos()
+    {
+        var transactions = new List<OMTransactionDto>
+        {
+            new OMTransactionDto { ReceivedDetails = "R1", ProcessedDetails = "P1", IsImmediate = true, Status = "Active" }
+        };
+            var interactions = new List<OMInteractionDto>
+        {
+            new OMInteractionDto { Transactions = transactions }
+        };
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"))
+            .ReturnsAsync(interactions);
+
+        var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123");
+        Assert.Single(result);
+        Assert.Equal("R1", result[0].ReceivedDetails);
+        Assert.Equal("P1", result[0].ProcessedDetails);
+        Assert.True(result[0].IsImmediate);
+        Assert.Equal("Active", result[0].Status);
+    }
+
+    [Fact]
+    public async Task GetTransactionsForInteractionByCustomerIdentificationAsync_InteractionsWithoutTransactions_FetchesByCaseId()
+    {
+        var interaction = new OMInteractionDto
+        {
+            Transactions = null,
+            Case = new OMCaseDto { Id = "case123" }
+        };
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"))
+            .ReturnsAsync(new List<OMInteractionDto> { interaction });
+
+        var repoTransactions = new List<OMTransaction>
+        {
+            new OMTransaction { CaseId = "case123", ReceivedDetails = "R2", ProcessedDetails = "P2", IsImmediate = false, Status = "Inactive" }
+        };
+        _transactionRepoMock
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
+            .ReturnsAsync(repoTransactions);
+
+        var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123");
+        Assert.Single(result);
+        Assert.Equal("R2", result[0].ReceivedDetails);
+        Assert.Equal("P2", result[0].ProcessedDetails);
+        Assert.False(result[0].IsImmediate);
+        Assert.Equal("Inactive", result[0].Status);
+    }
+
+    [Fact]
+    public async Task GetTransactionsForInteractionByCustomerIdentificationAsync_MixedInteractions_ReturnsCombinedDtos()
+    {
+        var directTransactions = new List<OMTransactionDto>
+        {
+            new OMTransactionDto { ReceivedDetails = "R1", ProcessedDetails = "P1", IsImmediate = true, Status = "Active" }
+        };
+        var interactionWithTransactions = new OMInteractionDto
+        {
+            Transactions = directTransactions
+        };
+        var interactionWithoutTransactions = new OMInteractionDto
+        {
+            Transactions = null,
+            Case = new OMCaseDto { Id = "case456" }
+        };
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"))
+            .ReturnsAsync(new List<OMInteractionDto> { interactionWithTransactions, interactionWithoutTransactions });
+
+        var repoTransactions = new List<OMTransaction>
+        {
+            new OMTransaction { CaseId = "case456", ReceivedDetails = "R2", ProcessedDetails = "P2", IsImmediate = false, Status = "Inactive" }
+        };
+        _transactionRepoMock
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
+            .ReturnsAsync(repoTransactions);
+
+        var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123");
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, t => t.ReceivedDetails == "R1" && t.ProcessedDetails == "P1");
+        Assert.Contains(result, t => t.ReceivedDetails == "R2" && t.ProcessedDetails == "P2");
     }
 }
