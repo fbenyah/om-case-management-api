@@ -18,9 +18,9 @@ public class GetInteractionsForCaseByCustomerIdentificationResponseTests
     public void Data_CanBeSetAndRetrieved()
     {
         var interactions = new List<OMInteractionDto>
-    {
-        new OMInteractionDto { Notes = "Test", Status = "Active" }
-    };
+        {
+            new OMInteractionDto { Notes = "Test", Status = "Active" }
+        };
         var response = new GetInteractionsForCaseByCustomerIdentificationResponse
         {
             Data = interactions
