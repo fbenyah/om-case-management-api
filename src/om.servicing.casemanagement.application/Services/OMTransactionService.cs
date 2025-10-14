@@ -8,14 +8,17 @@ namespace om.servicing.casemanagement.application.Services;
 public class OMTransactionService : IOMTransactionService
 {
     private readonly IOMCaseService _omCaseService;
+    private readonly IOMInteractionService _omInteractionService;
     private readonly IGenericRepository<OMTransaction> _transactionRepository;
 
     public OMTransactionService(
         IOMCaseService oMCaseService,
+        IOMInteractionService omInteractionService,
         IGenericRepository<OMTransaction> transactionRepository
         )
     {
         _omCaseService = oMCaseService;
+        _omInteractionService = omInteractionService;
         _transactionRepository = transactionRepository;
     }
 
@@ -71,6 +74,52 @@ public class OMTransactionService : IOMTransactionService
             if (transactionsForCase != null && transactionsForCase.Any())
             {
                 allTransactionsDto.AddRange(transactionsForCase);
+            }
+        }
+
+        return allTransactionsDto;
+    }
+
+    /// <summary>
+    /// Retrieves a list of transactions associated with a customer's interactions, based on the provided customer
+    /// identification number.
+    /// </summary>
+    /// <remarks>This method aggregates transactions from all interactions associated with the specified
+    /// customer. If transactions are not directly available in the interaction data, they are fetched using the case ID
+    /// associated with the interaction.</remarks>
+    /// <param name="customerIdentificationNumber">The unique identification number of the customer. This value cannot be null, empty, or consist only of
+    /// whitespace.</param>
+    /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions associated with the customer's
+    /// interactions. Returns an empty list if no interactions or transactions are found for the specified customer.</returns>
+    public async Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber)
+    {
+        if (string.IsNullOrWhiteSpace(customerIdentificationNumber))
+        {
+            return new List<OMTransactionDto>();
+        }
+
+        List<OMInteractionDto> omInteractionsDto = await _omInteractionService.GetInteractionsForCaseByCustomerIdentificationAsync(customerIdentificationNumber);
+
+        if (omInteractionsDto == null || !omInteractionsDto.Any())
+        {
+            return new List<OMTransactionDto>();
+        }
+
+        List<OMTransactionDto> allTransactionsDto = new();
+
+        foreach (OMInteractionDto omInteractionDto in omInteractionsDto)
+        {
+            if (omInteractionDto.Transactions != null && omInteractionDto.Transactions.Any())
+            {
+                allTransactionsDto.AddRange(omInteractionDto.Transactions);
+                continue;
+            }
+
+            // If transactions are not already loaded in the interaction DTO, fetch them by case ID
+            List<OMTransactionDto> transactionsForInteraction = await GetTransactionsForCaseByCaseIdAsync(omInteractionDto.Case?.Id);
+            if (transactionsForInteraction != null && transactionsForInteraction.Any())
+            {
+                allTransactionsDto.AddRange(transactionsForInteraction);
             }
         }
 

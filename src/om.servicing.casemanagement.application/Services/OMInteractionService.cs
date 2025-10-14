@@ -68,6 +68,13 @@ public class OMInteractionService : IOMInteractionService
 
         foreach (OMCaseDto omCaseDto in omCasesDto)
         {
+            if (omCaseDto.Interactions != null && omCaseDto.Interactions.Any())
+            {
+                allInteractionsDto.AddRange(omCaseDto.Interactions);
+                continue;
+            }
+
+            // if Interactions not populated in case, fetch from repo
             List<OMInteractionDto> interactionsForCase = await GetInteractionsForCaseByCaseIdAsync(omCaseDto.Id);
             if (interactionsForCase != null && interactionsForCase.Any())
             {
