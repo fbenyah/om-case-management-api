@@ -2,18 +2,21 @@
 using om.servicing.casemanagement.application.Services;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Entities;
+using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.tests.Application.Services;
 
 public class OMCaseServiceTests
 {
+    private readonly Mock<ILoggingService> _loggingServiceMock;
     private readonly Mock<IGenericRepository<OMCase>> _repoMock;
     private readonly OMCaseService _service;
 
     public OMCaseServiceTests()
     {
+        _loggingServiceMock = new Mock<ILoggingService>();
         _repoMock = new Mock<IGenericRepository<OMCase>>();
-        _service = new OMCaseService(_repoMock.Object);
+        _service = new OMCaseService(_loggingServiceMock.Object, _repoMock.Object);
     }
 
     [Fact]
