@@ -81,24 +81,26 @@ public class OMTransactionService : IOMTransactionService
     }
 
     /// <summary>
-    /// Retrieves a list of transactions associated with a customer's interactions, based on the provided customer
-    /// identification number.
+    /// Retrieves a list of transactions associated with a specific interaction for a given customer.
     /// </summary>
-    /// <remarks>This method aggregates transactions from all interactions associated with the specified
-    /// customer. If transactions are not directly available in the interaction data, they are fetched using the case ID
-    /// associated with the interaction.</remarks>
+    /// <remarks>This method first retrieves all interactions for the specified customer and filters them by
+    /// the provided interaction ID. If transactions are not already loaded in the interaction data, they are fetched
+    /// using the associated case ID.</remarks>
     /// <param name="customerIdentificationNumber">The unique identification number of the customer. This value cannot be null, empty, or consist only of
     /// whitespace.</param>
-    /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions associated with the customer's
-    /// interactions. Returns an empty list if no interactions or transactions are found for the specified customer.</returns>
-    public async Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber)
+    /// <param name="interactionId">The unique identifier of the interaction. This value cannot be null, empty, or consist only of whitespace.</param>
+    /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions associated with the specified
+    /// interaction. Returns an empty list if no transactions are found or if the input parameters are invalid.</returns>
+    public async Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId)
     {
-        if (string.IsNullOrWhiteSpace(customerIdentificationNumber))
+        if (string.IsNullOrWhiteSpace(customerIdentificationNumber) 
+            || string.IsNullOrWhiteSpace(interactionId))
         {
             return new List<OMTransactionDto>();
         }
 
-        List<OMInteractionDto> omInteractionsDto = await _omInteractionService.GetInteractionsForCaseByCustomerIdentificationAsync(customerIdentificationNumber);
+        List<OMInteractionDto>? omInteractionsDto = await _omInteractionService.GetInteractionsForCaseByCustomerIdentificationAsync(customerIdentificationNumber);
+        omInteractionsDto = omInteractionsDto?.Where(i => i.Id == interactionId)?.ToList();
 
         if (omInteractionsDto == null || !omInteractionsDto.Any())
         {
