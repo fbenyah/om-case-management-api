@@ -113,5 +113,6 @@ public class OMTransactionServiceTests
         Assert.Equal(2, result.Count);
         Assert.Contains(result, t => t.ReceivedDetails == "R1" && t.ProcessedDetails == "P1");
         Assert.Contains(result, t => t.ReceivedDetails == "R2" && t.ProcessedDetails == "P2");
+        _caseServiceMock.Verify(s => s.GetCasesForCustomer("cust123"), Times.Once);
     }
 }
