@@ -24,6 +24,7 @@ public class CaseManagerContextTests
                 Id = "case1",
                 Channel = "Email",
                 IdentificationNumber = "ID123",
+                ReferenceNumber = "REF123",
                 Status = "Open",
                 CreatedDate = DateTime.UtcNow
             };
@@ -51,6 +52,7 @@ public class CaseManagerContextTests
                 Id = "case2",
                 Channel = "Phone",
                 IdentificationNumber = "ID456",
+                ReferenceNumber = "REF123",
                 Status = "Closed",
                 CreatedDate = DateTime.UtcNow
             };
@@ -60,6 +62,7 @@ public class CaseManagerContextTests
             {
                 Id = "int1",
                 CaseId = "case2",
+                ReferenceNumber = "REF987",
                 Status = "Active",
                 Notes = "Test notes",
                 CreatedDate = DateTime.UtcNow
@@ -88,6 +91,7 @@ public class CaseManagerContextTests
                 Id = "case3",
                 Channel = "Web",
                 IdentificationNumber = "ID789",
+                ReferenceNumber = "REF123",
                 Status = "Pending",
                 CreatedDate = DateTime.UtcNow
             };
@@ -98,6 +102,7 @@ public class CaseManagerContextTests
                 Id = "int2",
                 CaseId = "case3",
                 Status = "Active",
+                ReferenceNumber = "REF987",
                 Notes = "Interaction notes",
                 CreatedDate = DateTime.UtcNow
             };
@@ -120,6 +125,7 @@ public class CaseManagerContextTests
                 InteractionId = "int2",
                 TransactionTypeId = "type1",
                 Status = "Processed",
+                ReferenceNumber = "REF654",
                 IsImmediate = true,
                 ReceivedDetails = "Received",
                 ProcessedDetails = "Processed",

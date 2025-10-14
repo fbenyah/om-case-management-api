@@ -28,6 +28,7 @@ public static class EntityToDtoMapper
         UpdateDate = entity.UpdateDate,
         Status = entity.Status,
         IdentificationNumber = entity.IdentificationNumber,
+        ReferenceNumber = entity.ReferenceNumber,
         Interactions = entity.Interactions?.Select(i => ToDto(i)).ToList() ?? new List<OMInteractionDto>()
     };
 
@@ -44,6 +45,7 @@ public static class EntityToDtoMapper
         CreatedDate = entity.CreatedDate,
         UpdateDate = entity.UpdateDate,
         Status = entity.Status,
+        ReferenceNumber = entity.ReferenceNumber,
         Case = entity.Case != null ? ToDto(entity.Case) : null,
         Transactions = entity.Transactions?.Select(t => ToDto(t)).ToList() ?? new List<OMTransactionDto>()
     };
@@ -62,6 +64,7 @@ public static class EntityToDtoMapper
         UpdateDate = entity.UpdateDate,
         Status = entity.Status,
         IsImmediate = entity.IsImmediate,
+        ReferenceNumber = entity.ReferenceNumber,
         ProcessedDetails = entity.ProcessedDetails,
         ReceivedDetails = entity.ReceivedDetails,
         TransactionType = entity.TransactionType != null ? ToDto(entity.TransactionType) : null,

@@ -9,7 +9,7 @@ namespace om.servicing.casemanagement.domain.Entities;
 /// <remarks>This class is mapped to the "case" table in the database. It includes details about the channel 
 /// through which the case was created and a collection of related interactions.</remarks>
 [Table("case")]
-public class OMCase : BaseEntityWithStatus
+public class OMCase : BaseEntityWithReferenceNumberAndStatus
 {
     [Required]
     [MaxLength(70)]

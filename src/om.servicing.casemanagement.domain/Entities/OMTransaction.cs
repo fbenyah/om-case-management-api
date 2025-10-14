@@ -10,7 +10,7 @@ namespace om.servicing.casemanagement.domain.Entities;
 /// as cases, interactions, and transaction types. It also includes details about whether the transaction is immediate
 /// and information about its received and processed states.</remarks>
 [Table("transaction")]
-public class OMTransaction : BaseEntityWithStatus
+public class OMTransaction : BaseEntityWithReferenceNumberAndStatus
 {
     [ForeignKey("case")]
     [MaxLength(50)]

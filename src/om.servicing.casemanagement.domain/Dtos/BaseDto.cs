@@ -24,3 +24,13 @@ public abstract class BaseDtoWithStatus : BaseDto
 {
     public string Status { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Represents a base data transfer object (DTO) that includes a reference number and status information.
+/// </summary>
+/// <remarks>This class is intended to be used as a base for DTOs that require a unique reference number  in
+/// addition to the status information provided by <see cref="BaseDtoWithStatus"/>.</remarks>
+public abstract class BaseDtoWithReferenceNumberAndStatus : BaseDtoWithStatus
+{
+    public string ReferenceNumber { get; set; } = string.Empty;
+}

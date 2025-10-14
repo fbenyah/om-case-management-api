@@ -31,8 +31,8 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
         var loggingServiceMock = new Mock<OM.RequestFramework.Core.Logging.ILoggingService>();
         var cases = new List<OMCaseDto>
         {
-            new OMCaseDto { Channel = "Email", IdentificationNumber = "123", Status = "Open" },
-            new OMCaseDto { Channel = "Phone", IdentificationNumber = "123", Status = "Closed" }
+            new OMCaseDto { Channel = "Email", ReferenceNumber = "ref1234", IdentificationNumber = "123", Status = "Open" },
+            new OMCaseDto { Channel = "Phone", ReferenceNumber = "ref6789", IdentificationNumber = "123", Status = "Closed" }
         };
         caseServiceMock.Setup(s => s.GetCasesForCustomer("123")).ReturnsAsync(cases);
 
@@ -47,6 +47,8 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
         Assert.Equal(2, result.Data.Count);
         Assert.Equal("Email", result.Data[0].Channel);
         Assert.Equal("Phone", result.Data[1].Channel);
+        Assert.Equal("ref1234", result.Data[0].ReferenceNumber);
+        Assert.Equal("ref6789", result.Data[1].ReferenceNumber);
         caseServiceMock.Verify(s => s.GetCasesForCustomer("123"), Times.Once);
     }
 

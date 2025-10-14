@@ -16,6 +16,7 @@ public class EntityToDtoMapperTests
             CreatedDate = DateTime.UtcNow,
             UpdateDate = DateTime.UtcNow,
             Status = "Active",
+            ReferenceNumber = "ref9876",
             Transactions = new List<OMTransaction>()
         };
 
@@ -26,6 +27,7 @@ public class EntityToDtoMapperTests
             CreatedDate = DateTime.UtcNow,
             UpdateDate = DateTime.UtcNow,
             Status = "Open",
+            ReferenceNumber = "ref1234",
             Interactions = new List<OMInteraction> { interaction }
         };
 
@@ -33,9 +35,11 @@ public class EntityToDtoMapperTests
 
         dto.Id.Should().Be(entity.Id);
         dto.Channel.Should().Be(entity.Channel);
+        dto.ReferenceNumber.Should().Be(entity.ReferenceNumber);
         dto.Status.Should().Be(entity.Status);
         dto.Interactions.Should().HaveCount(1);
         dto.Interactions[0].Notes.Should().Be(interaction.Notes);
+        dto.Interactions[0].ReferenceNumber.Should().Be(interaction.ReferenceNumber);
     }
 
     [Fact]
@@ -47,6 +51,7 @@ public class EntityToDtoMapperTests
             CreatedDate = DateTime.UtcNow,
             UpdateDate = DateTime.UtcNow,
             Status = "Processed",
+            ReferenceNumber = "ref1234",
             IsImmediate = true,
             ReceivedDetails = "Received",
             ProcessedDetails = "Processed",
@@ -62,6 +67,7 @@ public class EntityToDtoMapperTests
             CreatedDate = DateTime.UtcNow,
             UpdateDate = DateTime.UtcNow,
             Status = "Active",
+            ReferenceNumber = "ref9876",
             Case = null,
             Transactions = new List<OMTransaction> { transaction }
         };
@@ -71,8 +77,10 @@ public class EntityToDtoMapperTests
         dto.Id.Should().Be(entity.Id);
         dto.Notes.Should().Be(entity.Notes);
         dto.Status.Should().Be(entity.Status);
+        dto.ReferenceNumber.Should().Be(entity.ReferenceNumber);
         dto.Transactions.Should().HaveCount(1);
         dto.Transactions[0].Id.Should().Be(transaction.Id);
+        dto.Transactions[0].ReferenceNumber.Should().Be(transaction.ReferenceNumber);
     }
 
     [Fact]
@@ -94,6 +102,7 @@ public class EntityToDtoMapperTests
             CreatedDate = DateTime.UtcNow,
             UpdateDate = DateTime.UtcNow,
             Status = "Processed",
+            ReferenceNumber = "ref1234",
             IsImmediate = false,
             ReceivedDetails = "Received",
             ProcessedDetails = "Processed",
@@ -107,6 +116,7 @@ public class EntityToDtoMapperTests
         dto.Id.Should().Be(entity.Id);
         dto.Status.Should().Be(entity.Status);
         dto.IsImmediate.Should().Be(entity.IsImmediate);
+        dto.ReferenceNumber.Should().Be(entity.ReferenceNumber);
         dto.TransactionType.Should().NotBeNull();
         dto.TransactionType.Name.Should().Be(transactionType.Name);
     }

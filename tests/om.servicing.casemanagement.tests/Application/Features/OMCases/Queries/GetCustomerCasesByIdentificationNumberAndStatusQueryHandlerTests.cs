@@ -59,7 +59,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
     {
         var cases = new List<OMCaseDto>
         {
-            new OMCaseDto { IdentificationNumber = "123456", Status = "Open", Channel = "Web" }
+            new OMCaseDto { IdentificationNumber = "123456", ReferenceNumber = "ref1234", Status = "Open", Channel = "Web" }
         };
 
         _caseServiceMock

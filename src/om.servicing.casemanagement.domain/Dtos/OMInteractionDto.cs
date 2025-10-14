@@ -7,7 +7,7 @@
 /// <remarks>This data transfer object (DTO) is used to encapsulate information about an interaction,  including
 /// optional references to a related case and a list of transactions.  The <see cref="Notes"/> property provides
 /// additional context or comments about the interaction.</remarks>
-public class OMInteractionDto : BaseDtoWithStatus
+public class OMInteractionDto : BaseDtoWithReferenceNumberAndStatus
 {
     public string Notes { get; set; } = string.Empty;
     public OMCaseDto? Case { get; set; } = null;    

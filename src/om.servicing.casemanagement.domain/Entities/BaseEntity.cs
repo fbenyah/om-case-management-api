@@ -38,3 +38,16 @@ public abstract class BaseEntityWithStatus : BaseEntity
     [Column("status")]
     public string Status { get; set; }
 }
+
+/// <summary>
+/// Represents an abstract base entity that includes a reference number and a status.
+/// </summary>
+/// <remarks>This class extends <see cref="BaseEntityWithStatus"/> by adding a required reference number property.
+/// The <see cref="ReferenceNumber"/> property is constrained to a maximum length of 20 characters.</remarks>
+public abstract class BaseEntityWithReferenceNumberAndStatus : BaseEntityWithStatus
+{
+    [Required]
+    [MaxLength(20)]
+    [Column("reference_number")]
+    public string ReferenceNumber { get; set; }
+}

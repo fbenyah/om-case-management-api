@@ -29,6 +29,7 @@ public static class DtoToEntityMapper
         UpdateDate = dto.UpdateDate != null ? Convert.ToDateTime(dto.UpdateDate) : DateTime.MinValue,
         Status = dto.Status,
         IdentificationNumber = dto.IdentificationNumber,
+        ReferenceNumber = dto.ReferenceNumber,
         Interactions = dto.Interactions?.Select(i => ToEntity(i)).ToList() ?? new List<OMInteraction>()
     };
 
@@ -48,6 +49,7 @@ public static class DtoToEntityMapper
         CreatedDate = dto.CreatedDate != null ? Convert.ToDateTime(dto.CreatedDate) : DateTime.MinValue,
         UpdateDate = dto.UpdateDate != null ? Convert.ToDateTime(dto.UpdateDate) : DateTime.MinValue,
         Status = dto.Status,
+        ReferenceNumber = dto.ReferenceNumber,
         CaseId = dto.Case != null ? dto.Case.Id : string.Empty,
         Case = dto.Case != null ? ToEntity(dto.Case) : null,
         Transactions = dto.Transactions?.Select(t => ToEntity(t)).ToList() ?? new List<OMTransaction>()
@@ -68,6 +70,7 @@ public static class DtoToEntityMapper
         UpdateDate = dto.UpdateDate != null ? Convert.ToDateTime(dto.UpdateDate) : DateTime.MinValue,
         Status = dto.Status,
         IsImmediate = dto.IsImmediate,
+        ReferenceNumber = dto.ReferenceNumber,
         ProcessedDetails = dto.ProcessedDetails,
         ReceivedDetails = dto.ReceivedDetails,
         TransactionTypeId = dto.TransactionType != null ? dto.TransactionType.Id : string.Empty,

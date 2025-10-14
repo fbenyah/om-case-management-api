@@ -18,7 +18,7 @@ public class GetCustomerCasesByIdentificationNumberResponseTests
     {
         var cases = new List<OMCaseDto>
         {
-            new OMCaseDto { Channel = "Email", IdentificationNumber = "123", Status = "Open" }
+            new OMCaseDto { Channel = "Email", ReferenceNumber = "ref1234", IdentificationNumber = "123", Status = "Open" }
         };
         var response = new GetCustomerCasesByIdentificationNumberResponse
         {
@@ -27,6 +27,7 @@ public class GetCustomerCasesByIdentificationNumberResponseTests
         Assert.Equal(cases, response.Data);
         Assert.Single(response.Data);
         Assert.Equal("Email", response.Data[0].Channel);
+        Assert.Equal("ref1234", response.Data[0].ReferenceNumber);
     }
 
     [Fact]
