@@ -15,6 +15,7 @@ public class CaseChannelTests
     [InlineData(CaseChannel.PublicWeb, 6)]
     [InlineData(CaseChannel.SecureWeb, 7)]
     [InlineData(CaseChannel.Branch, 8)]
+    [InlineData(CaseChannel.IMIConnect, 9)]
     public void EnumValues_AreCorrect(CaseChannel channel, int expectedValue)
     {
         Assert.Equal(expectedValue, (int)channel);
@@ -29,6 +30,7 @@ public class CaseChannelTests
     [InlineData(CaseChannel.PublicWeb, "Public Web")]
     [InlineData(CaseChannel.SecureWeb, "Secure Web")]
     [InlineData(CaseChannel.Branch, "Branch")]
+    [InlineData(CaseChannel.IMIConnect, "Whatsapp")]
     public void DescriptionAttribute_IsCorrect(CaseChannel channel, string expectedDescription)
     {
         var type = typeof(CaseChannel);
