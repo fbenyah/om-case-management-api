@@ -206,20 +206,23 @@ public class OMCaseServiceTests
     }
 
     [Fact]
-    public async Task CreateCaseAsync_ReturnsFalse_WhenDtoIsNull()
+    public async Task CreateCaseAsync_ReturnsResponseWithNoData_WhenDtoIsNull()
     {
         var result = await _service.CreateCaseAsync(null);
-        Assert.False(result);
+        Assert.NotNull(result);
+        Assert.Empty(result.Data.ReferenceNumber);
+        Assert.Empty(result.Data.Id);
+        Assert.NotNull(result.ErrorMessages ?? new List<string>());
+        Assert.False(result.Success);
         _caseRepositoryMock.Verify(r => r.AddAsync(It.IsAny<OMCase>()), Times.Never);
     }
 
     [Fact]
-    public async Task CreateCaseAsync_ReturnsTrue_WhenDtoIsValid()
+    public async Task CreateCaseAsync_SuccessfullyCreatesCase_AndSetsReferenceNumberAndId()
     {
         var dto = new OMCaseDto
         {
-            ReferenceNumber = "REF123",
-            Channel = "Web",
+            Channel = "PublicWeb",
             IdentificationNumber = "ID123",
             Status = "Open"
         };
@@ -230,12 +233,61 @@ public class OMCaseServiceTests
 
         var result = await _service.CreateCaseAsync(dto);
 
-        Assert.True(result);
+        Assert.NotNull(result);
+        Assert.False(string.IsNullOrWhiteSpace(result.Data.ReferenceNumber));
+        Assert.False(string.IsNullOrWhiteSpace(result.Data.Id));
+        Assert.True(result.Success);
+        Assert.Empty(result.ErrorMessages ?? new List<string>());
         _caseRepositoryMock.Verify(r => r.AddAsync(It.Is<OMCase>(c =>
-            c.ReferenceNumber == "REF123" &&
-            c.Channel == "Web" &&
             c.IdentificationNumber == "ID123" &&
-            c.Status == "Open"
+            c.Status == "Open" &&
+            c.Channel == "PublicWeb" &&
+            !string.IsNullOrWhiteSpace(c.ReferenceNumber) &&
+            !string.IsNullOrWhiteSpace(c.Id)
         )), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateCaseAsync_ReturnsError_WhenRepositoryThrows()
+    {
+        var dto = new OMCaseDto
+        {
+            Channel = "PublicWeb",
+            IdentificationNumber = "ID123",
+            Status = "Open"
+        };
+
+        _caseRepositoryMock
+            .Setup(r => r.AddAsync(It.IsAny<OMCase>()))
+            .ThrowsAsync(new Exception("DB error"));
+
+        var result = await _service.CreateCaseAsync(dto);
+
+        Assert.NotNull(result);
+        Assert.False(result.Success);
+        Assert.NotEmpty(result.CustomExceptions);
+        _loggingServiceMock.Verify(l => l.LogError(It.IsAny<string>(), It.IsAny<Exception>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateCaseAsync_ReferenceNumberFormat_IsCorrect()
+    {
+        var dto = new OMCaseDto
+        {
+            Channel = "PublicWeb",
+            IdentificationNumber = "ID123",
+            Status = "Open"
+        };
+
+        _caseRepositoryMock
+            .Setup(r => r.AddAsync(It.IsAny<OMCase>()))
+            .Returns(Task.CompletedTask);
+
+        var result = await _service.CreateCaseAsync(dto);
+
+        Assert.NotNull(result.Data.ReferenceNumber);
+        // Should start with "CSP" for CustomerServicing + PublicWeb
+        Assert.StartsWith("CSP", result.Data.ReferenceNumber);
+        Assert.True(result.Data.ReferenceNumber.Length == 18);
     }
 }
