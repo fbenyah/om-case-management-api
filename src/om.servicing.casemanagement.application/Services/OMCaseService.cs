@@ -3,7 +3,9 @@ using om.servicing.casemanagement.application.Utilities;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
+using om.servicing.casemanagement.domain.Enums;
 using om.servicing.casemanagement.domain.Mappings;
+using om.servicing.casemanagement.domain.Utilities;
 using OM.RequestFramework.Core.Exceptions;
 using OM.RequestFramework.Core.Logging;
 
@@ -180,16 +182,51 @@ public class OMCaseService : BaseService, IOMCaseService
         return response;
     }
 
-    // create a case
-    public async Task<bool> CreateCaseAsync(OMCaseDto omCaseDto)
+    /// <summary>
+    /// Creates a new case asynchronously based on the provided case data transfer object (DTO).
+    /// </summary>
+    /// <remarks>This method generates a unique identifier and reference number for the case, maps the DTO to
+    /// an  entity, and persists the entity to the repository. If an error occurs during persistence, the  response will
+    /// include a custom exception with details about the failure.</remarks>
+    /// <param name="omCaseDto">The data transfer object containing the details of the case to be created.  This parameter cannot be <see
+    /// langword="null"/>.</param>
+    /// <returns>An <see cref="OMCaseCreateResponse"/> containing the reference number and ID of the created case.  If the input
+    /// is <see langword="null"/> or an error occurs during case creation, the response will  indicate the failure and
+    /// include relevant error details.</returns>
+    public async Task<OMCaseCreateResponse> CreateCaseAsync(OMCaseDto omCaseDto)
     {
+        OMCaseCreateResponse response = new();
+
         if (omCaseDto == null)
         {
-            return false;
+            response.SetOrUpdateErrorMessage("Case data is required.");
+            return response;
         }
+                
+        CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omCaseDto.Channel) ?? CaseChannel.Unknown;
+        // default to CustomerServicing for now
+        OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
+        omCaseDto.Id = UlidUtils.NewUlidString();
+        omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
+
         OMCase omCase = DtoToEntityMapper.ToEntity(omCaseDto);
 
-        await _caseRepository.AddAsync(omCase);
-        return true;
+        try
+        {
+            await _caseRepository.AddAsync(omCase);
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while attempting to create case '{omCaseDto.IdentificationNumber}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new WritePersistenceException(ex, errorMessage));
+            return response;
+        }
+
+        response.Data.ReferenceNumber = omCase.ReferenceNumber;
+        response.Data.Id = omCase.Id;
+
+        return response;
     }
 }

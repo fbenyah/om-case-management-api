@@ -1,4 +1,5 @@
 ﻿using om.servicing.casemanagement.application.Services.Models;
+using om.servicing.casemanagement.domain.Dtos;
 
 namespace om.servicing.casemanagement.application.Services;
 
@@ -60,4 +61,17 @@ public interface IOMCaseService
     /// status. If no cases are found, the <see cref="OMCaseListResponse.Data"/> property will contain an empty list. If
     /// an error occurs, the response will include an appropriate error message or exception.</returns>
     Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAndStatusAsync(string referenceNumber, string status);
+
+    /// <summary>
+    /// Creates a new case asynchronously based on the provided case data transfer object (DTO).
+    /// </summary>
+    /// <remarks>This method generates a unique identifier and reference number for the case, maps the DTO to
+    /// an  entity, and persists the entity to the repository. If an error occurs during persistence, the  response will
+    /// include a custom exception with details about the failure.</remarks>
+    /// <param name="omCaseDto">The data transfer object containing the details of the case to be created.  This parameter cannot be <see
+    /// langword="null"/>.</param>
+    /// <returns>An <see cref="OMCaseCreateResponse"/> containing the reference number and ID of the created case.  If the input
+    /// is <see langword="null"/> or an error occurs during case creation, the response will  indicate the failure and
+    /// include relevant error details.</returns>
+    Task<OMCaseCreateResponse> CreateCaseAsync(OMCaseDto omCaseDto);
 }
