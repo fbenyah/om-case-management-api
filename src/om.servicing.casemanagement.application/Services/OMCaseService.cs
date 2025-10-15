@@ -209,6 +209,8 @@ public class OMCaseService : BaseService, IOMCaseService
         omCaseDto.Id = UlidUtils.NewUlidString();
         omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
 
+        await EnsureUniqueCaseIdAndReferenceNumber(omCaseDto, channel, operationalBusinessSegment);
+
         OMCase omCase = DtoToEntityMapper.ToEntity(omCaseDto);
 
         try
@@ -228,5 +230,99 @@ public class OMCaseService : BaseService, IOMCaseService
         response.Data.Id = omCase.Id;
 
         return response;
+    }
+
+    /// <summary>
+    /// Determines whether a case with the specified ID exists in the repository.
+    /// </summary>
+    /// <remarks>This method logs an error if an exception occurs while accessing the repository.</remarks>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <returns><see langword="true"/> if a case with the specified ID exists; otherwise, <see langword="false"/>. Returns <see
+    /// langword="false"/> if the <paramref name="caseId"/> is null, empty, or whitespace, or if an error occurs during
+    /// the operation.</returns>
+    public async Task<bool> CaseExistsWithIdAsync(string caseId)
+    {
+        if (string.IsNullOrWhiteSpace(caseId))
+        {
+            return false;
+        }
+
+        try
+        {
+            OMCase? omCase = await _caseRepository.GetByIdAsync(caseId);
+            if (omCase != null)
+            {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of case with ID '{caseId}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+            return false;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Asynchronously determines whether a case with the specified reference number exists.
+    /// </summary>
+    /// <remarks>If the <paramref name="referenceNumber"/> is null, empty, or consists only of whitespace, the
+    /// method immediately returns <see langword="false"/>. Logs an error and returns <see langword="false"/> if an
+    /// exception occurs during the operation.</remarks>
+    /// <param name="referenceNumber">The reference number of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <returns><see langword="true"/> if a case with the specified reference number exists; otherwise, <see langword="false"/>.</returns>
+    public async Task<bool> CaseExistsWithReferenceNumberAsync(string referenceNumber)
+    {
+        if (string.IsNullOrWhiteSpace(referenceNumber))
+        {
+            return false;
+        }
+
+        try
+        {
+            IEnumerable<OMCase>? omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber);
+            if (omCases != null && omCases?.Count() > 0)
+            {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of case with reference number '{referenceNumber}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+            return false;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Ensures that the specified case has a unique identifier and reference number.
+    /// </summary>
+    /// <remarks>This method checks for existing cases with the same identifier or reference number and
+    /// regenerates these values until they are unique. The <paramref name="omCaseDto"/> object is modified in place to
+    /// reflect the updated values.</remarks>
+    /// <param name="omCaseDto">The case data transfer object containing the case details. The <see cref="OMCaseDto.Id"/> and <see
+    /// cref="OMCaseDto.ReferenceNumber"/> properties will be updated to ensure uniqueness.</param>
+    /// <param name="channel">The channel associated with the case, used to generate a unique reference number.</param>
+    /// <param name="operationalBusinessSegment">The operational business segment associated with the case, used to generate a unique reference number.</param>
+    /// <returns></returns>
+    private async Task EnsureUniqueCaseIdAndReferenceNumber(OMCaseDto omCaseDto, CaseChannel channel, OperationalBusinessSegment operationalBusinessSegment)
+    {
+        // ensure that there is no existing case with the same id
+        // if there is, generate a new id and keep checking till it is unique
+        while (await CaseExistsWithIdAsync(omCaseDto.Id))
+        {
+            omCaseDto.Id = UlidUtils.NewUlidString();
+            omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
+        }
+
+        // ensure that there is no existing case with the same reference number
+        // if there is, generate a new reference number and keep checking till it is unique
+        while (await CaseExistsWithReferenceNumberAsync(omCaseDto.ReferenceNumber))
+        {
+            omCaseDto.Id = UlidUtils.NewUlidString();
+            omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
+        }
     }
 }

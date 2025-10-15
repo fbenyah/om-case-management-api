@@ -74,4 +74,24 @@ public interface IOMCaseService
     /// is <see langword="null"/> or an error occurs during case creation, the response will  indicate the failure and
     /// include relevant error details.</returns>
     Task<OMCaseCreateResponse> CreateCaseAsync(OMCaseDto omCaseDto);
+
+    /// <summary>
+    /// Determines whether a case with the specified ID exists in the repository.
+    /// </summary>
+    /// <remarks>This method logs an error if an exception occurs while accessing the repository.</remarks>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <returns><see langword="true"/> if a case with the specified ID exists; otherwise, <see langword="false"/>. Returns <see
+    /// langword="false"/> if the <paramref name="caseId"/> is null, empty, or whitespace, or if an error occurs during
+    /// the operation.</returns>
+    Task<bool> CaseExistsWithIdAsync(string caseId);
+
+    /// <summary>
+    /// Asynchronously determines whether a case with the specified reference number exists.
+    /// </summary>
+    /// <remarks>If the <paramref name="referenceNumber"/> is null, empty, or consists only of whitespace, the
+    /// method immediately returns <see langword="false"/>. Logs an error and returns <see langword="false"/> if an
+    /// exception occurs during the operation.</remarks>
+    /// <param name="referenceNumber">The reference number of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <returns><see langword="true"/> if a case with the specified reference number exists; otherwise, <see langword="false"/>.</returns>
+    Task<bool> CaseExistsWithReferenceNumberAsync(string referenceNumber);
 }
