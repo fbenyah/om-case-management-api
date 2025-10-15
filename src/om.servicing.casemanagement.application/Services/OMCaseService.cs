@@ -206,6 +206,7 @@ public class OMCaseService : BaseService, IOMCaseService
         CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omCaseDto.Channel) ?? CaseChannel.Unknown;
         // default to CustomerServicing for now
         OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
+        omCaseDto.CreatedDate = DateTime.Now;        
         omCaseDto.Id = UlidUtils.NewUlidString();
         omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
 
