@@ -14,7 +14,7 @@ public enum CaseChannel
     AdviserWorkBench,
 
     [Description("Whatsapp")]
-    Connect,
+    Connect,    
 
     [Description("MomApp")]
     MomApp,
@@ -26,5 +26,8 @@ public enum CaseChannel
     SecureWeb,
 
     [Description("Branch")]
-    Branch
+    Branch,
+
+    [Description("Whatsapp")]
+    IMIConnect
 }
