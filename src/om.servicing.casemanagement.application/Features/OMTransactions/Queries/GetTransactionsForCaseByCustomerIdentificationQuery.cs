@@ -61,7 +61,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandler : Shared
             return response;
         }
 
-        var transactions = await _transactionService.GetTransactionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber);
+        var transactions = await _transactionService.GetTransactionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, cancellationToken);
         response.Data = transactions;
 
         return response;

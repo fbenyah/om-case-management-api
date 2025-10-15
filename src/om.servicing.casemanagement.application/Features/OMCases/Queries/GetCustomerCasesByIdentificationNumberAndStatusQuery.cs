@@ -79,7 +79,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandler : Share
             return response;
         }
 
-        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAndStatusAsync(request.IdentificationNumber, request.Status);
+        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAndStatusAsync(request.IdentificationNumber, request.Status, cancellationToken);
         
         if (!omCaseListResponse.Success)
         {            

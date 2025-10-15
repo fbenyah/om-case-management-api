@@ -70,7 +70,7 @@ public class GetInteractionsForCaseByCustomerIdentificationQueryHandler : Shared
             return response;
         }
 
-        List<domain.Dtos.OMInteractionDto> omInteractions = await _interactionService.GetInteractionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber);
+        List<domain.Dtos.OMInteractionDto> omInteractions = await _interactionService.GetInteractionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, cancellationToken);
         response.Data = omInteractions;
 
         return response;

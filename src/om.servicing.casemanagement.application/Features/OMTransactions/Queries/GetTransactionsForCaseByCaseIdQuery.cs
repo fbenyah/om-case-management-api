@@ -66,7 +66,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandler : SharedFeatures, IReque
             return response;
         }
 
-        List<domain.Dtos.OMTransactionDto> transactions = await _transactionService.GetTransactionsForCaseByCaseIdAsync(request.CaseId);
+        List<domain.Dtos.OMTransactionDto> transactions = await _transactionService.GetTransactionsForCaseByCaseIdAsync(request.CaseId, cancellationToken);
         response.Data = transactions;
 
         return response;

@@ -78,7 +78,7 @@ public class GetTransactionsForInteractionByCustomerIdentificationQueryHandler :
             return response;
         }
 
-        var transactions = await _transactionService.GetTransactionsForInteractionByCustomerIdentificationAsync(request.CustomerIdentificationNumber, request.InteractionId);
+        var transactions = await _transactionService.GetTransactionsForInteractionByCustomerIdentificationAsync(request.CustomerIdentificationNumber, request.InteractionId, cancellationToken);
         response.Data = transactions;
 
         return response;

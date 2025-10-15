@@ -65,7 +65,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandler : SharedFeatures, IReque
             return response;
         }
 
-        List<domain.Dtos.OMInteractionDto> omInteractions = await _interactionService.GetInteractionsForCaseByCaseIdAsync(request.CaseId);
+        List<domain.Dtos.OMInteractionDto> omInteractions = await _interactionService.GetInteractionsForCaseByCaseIdAsync(request.CaseId, cancellationToken);
         response.Data = omInteractions;
 
         return response;
