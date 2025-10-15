@@ -6,6 +6,7 @@ using om.servicing.casemanagement.api.Controllers.V1;
 using om.servicing.casemanagement.application.Features.OMCases.Commands;
 using om.servicing.casemanagement.application.Features.OMCases.Queries;
 using om.servicing.casemanagement.application.Services.Models;
+using om.servicing.casemanagement.domain.Enums;
 
 namespace om.servicing.casemanagement.tests.Api.Controllers.V1;
 
@@ -24,7 +25,7 @@ public class CaseContollerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByIdentification("source", "123");
+        var result = await controller.GetCustomerCasesByIdentification(CaseChannel.Branch, "123");
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -47,7 +48,7 @@ public class CaseContollerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByIdentification("source", "123");
+        var result = await controller.GetCustomerCasesByIdentification(CaseChannel.SecureWeb, "123");
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -68,7 +69,7 @@ public class CaseContollerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        await controller.GetCustomerCasesByIdentification("source", "ABC123");
+        await controller.GetCustomerCasesByIdentification(CaseChannel.Connect, "ABC123");
 
         // Assert
         mediatorMock.Verify(m => m.Send(
@@ -89,7 +90,7 @@ public class CaseContollerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByIdentificationAndStatus("source", "123", "Open");
+        var result = await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.IMIConnect, "123", "Open");
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -112,7 +113,7 @@ public class CaseContollerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByIdentificationAndStatus("source", "123", "Open");
+        var result = await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.AdviserWorkBench, "123", "Open");
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -133,7 +134,7 @@ public class CaseContollerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        await controller.GetCustomerCasesByIdentificationAndStatus("source", "ABC123", "Closed");
+        await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.AgentWorkBench, "ABC123", "Closed");
 
         // Assert
         mediatorMock.Verify(m => m.Send(
@@ -155,7 +156,7 @@ public class CaseContollerTests
             .ReturnsAsync(response);
 
         var controller = CreateControllerWithMediator(mediatorMock);
-        var result = await controller.CreateShellCase("TestSourceSystem");
+        var result = await controller.CreateShellCase(CaseChannel.AgentWorkBench);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedResponse = Assert.IsType<CreateShellCaseCommandResponse>(okResult.Value);
@@ -178,7 +179,7 @@ public class CaseContollerTests
             .ReturnsAsync(response);
 
         var controller = CreateControllerWithMediator(mediatorMock);
-        var result = await controller.CreateShellCase("TestSourceSystem");
+        var result = await controller.CreateShellCase(CaseChannel.AdviserWorkBench);
 
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
         var returnedResponse = Assert.IsType<CreateShellCaseCommandResponse>(badRequestResult.Value);
@@ -200,7 +201,7 @@ public class CaseContollerTests
             .ReturnsAsync(response);
 
         var controller = CreateControllerWithMediator(mediatorMock);
-        var result = await controller.CreateShellCase("TestSourceSystem");
+        var result = await controller.CreateShellCase(CaseChannel.Unknown);
 
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
         var returnedResponse = Assert.IsType<CreateShellCaseCommandResponse>(badRequestResult.Value);
