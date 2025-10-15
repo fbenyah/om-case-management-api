@@ -82,9 +82,17 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandler : Share
         OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAndStatusAsync(request.IdentificationNumber, request.Status);
         
         if (!omCaseListResponse.Success)
-        {
-            response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
-            response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
+        {            
+            if (omCaseListResponse.ErrorMessages != null && omCaseListResponse.ErrorMessages.Any())
+            {
+                response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
+            }
+
+            if (omCaseListResponse.CustomExceptions != null && omCaseListResponse.CustomExceptions.Any())
+            {
+                response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
+            }
+            
             return response;
         }
 

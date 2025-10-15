@@ -76,8 +76,16 @@ public class GetCustomerCasesByIdentificationNumberQueryHandler : SharedFeatures
         
         if (!omCaseListResponse.Success)
         {
-            response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
-            response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
+            if (omCaseListResponse.ErrorMessages != null && omCaseListResponse.ErrorMessages.Any())
+            {
+                response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
+            }
+
+            if (omCaseListResponse.CustomExceptions != null && omCaseListResponse.CustomExceptions.Any())
+            {
+                response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
+            }
+
             return response;
         }
 
