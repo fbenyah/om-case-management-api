@@ -5,5 +5,6 @@ public class CaseManagementConstants
     public static class HttpHeaders
     {
         public const string XSourceSystem = "X-Source-System";
+        public const string XCustomerId = "X-Customer-Id";
     }
 }
