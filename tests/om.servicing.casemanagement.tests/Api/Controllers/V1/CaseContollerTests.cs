@@ -209,6 +209,51 @@ public class CaseContollerTests
         Assert.Contains("Validation error", returnedResponse.ErrorMessages);
     }
 
+    [Fact]
+    public async Task CreateOMCase_ReturnsOk_WhenSuccess()
+    {
+        var response = new CreateOMCaseCommandResponse
+        {
+            Data = new BasicCaseCreateResponse { Id = "CASE123", ReferenceNumber = "REF456" }
+        };
+
+        var mediatorMock = new Mock<IMediator>();
+        mediatorMock
+            .Setup(m => m.Send(It.IsAny<CreateOMCaseCommand>(), default))
+            .ReturnsAsync(response);
+
+        var controller = CreateControllerWithMediator(mediatorMock);
+        var result = await controller.CreateOMCase(CaseChannel.PublicWeb, "ID123");
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returnedResponse = Assert.IsType<CreateOMCaseCommandResponse>(okResult.Value);
+        Assert.True(returnedResponse.Success);
+        Assert.Equal("CASE123", returnedResponse.Data.Id);
+        Assert.Equal("REF456", returnedResponse.Data.ReferenceNumber);
+    }
+
+    [Fact]
+    public async Task CreateOMCase_ReturnsBadRequest_WhenNotSuccess()
+    {
+        var response = new CreateOMCaseCommandResponse
+        {
+        };
+        response.SetOrUpdateErrorMessage("Failed to create case.");
+
+        var mediatorMock = new Mock<IMediator>();
+        mediatorMock
+            .Setup(m => m.Send(It.IsAny<CreateOMCaseCommand>(), default))
+            .ReturnsAsync(response);
+
+        var controller = CreateControllerWithMediator(mediatorMock);
+        var result = await controller.CreateOMCase(CaseChannel.PublicWeb, "ID123");
+
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var returnedResponse = Assert.IsType<CreateOMCaseCommandResponse>(badRequestResult.Value);
+        Assert.False(returnedResponse.Success);
+        Assert.Contains("Failed to create case.", returnedResponse.ErrorMessages);
+    }
+
     private CaseContoller CreateControllerWithMediator(Mock<IMediator> mediatorMock)
     {
         var controller = new CaseContoller();
