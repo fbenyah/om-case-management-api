@@ -23,42 +23,52 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         );
     }
 
-    [Fact]
-    public async Task Handle_ReturnsError_WhenIdentificationNumberIsMissing()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Handle_ReturnsError_WhenIdentificationNumberIsMissing(string identificationNumber)
     {
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
-            IdentificationNumber = "",
+            IdentificationNumber = identificationNumber,
             Status = "Open"
         };
 
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        Assert.False(result.Success);
+        Assert.NotNull(result);
         Assert.Contains("Identification number is required.", result.ErrorMessages);
+        Assert.False(result.Success);
         Assert.Empty(result.Data);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
-    [Fact]
-    public async Task Handle_ReturnsError_WhenStatusIsMissing()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Handle_ReturnsError_WhenStatusIsMissing(string status)
     {
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
             IdentificationNumber = "123456",
-            Status = ""
+            Status = status
         };
 
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        Assert.False(result.Success);
+        Assert.NotNull(result);
         Assert.Contains("Status of case(s) is required.", result.ErrorMessages);
+        Assert.False(result.Success);
         Assert.Empty(result.Data);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
     public async Task Handle_ReturnsCases_WhenInputIsValid()
     {
-        var cases = new OMCaseListResponse
+        var caseListResponse = new OMCaseListResponse
         {
             Data = new List<OMCaseDto>
             {
@@ -67,8 +77,8 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         };
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByReferenceNumberAndStatusAsync("123456", "Open"))
-            .ReturnsAsync(cases);
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open"))
+            .ReturnsAsync(caseListResponse);
 
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
@@ -78,17 +88,52 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
 
         var result = await _handler.Handle(query, CancellationToken.None);
 
+        Assert.NotNull(result);
         Assert.True(result.Success);
-        Assert.Empty(result.ErrorMessages);
-        Assert.Equal(cases.Data, result.Data);
+        Assert.Empty(result.ErrorMessages ?? new List<string>());
+        Assert.Equal(caseListResponse.Data, result.Data);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open"), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsError_WhenServiceResponseIsNotSuccess()
+    {
+        var caseListResponse = new OMCaseListResponse
+        {
+            Data = new List<OMCaseDto>()
+        };
+        caseListResponse.SetOrUpdateErrorMessage("Service error");
+
+        _caseServiceMock
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open"))
+            .ReturnsAsync(caseListResponse);
+
+        var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
+        {
+            IdentificationNumber = "123456",
+            Status = "Open"
+        };
+
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.False(result.Success);
+        Assert.Contains("Service error", result.ErrorMessages);
+        Assert.Empty(result.Data);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open"), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ReturnsEmptyList_WhenServiceReturnsNoCases()
     {
+        var caseListResponse = new OMCaseListResponse
+        {
+            Data = new List<OMCaseDto>()
+        };
+
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByReferenceNumberAndStatusAsync("123456", "Closed"))
-            .ReturnsAsync(new OMCaseListResponse());
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Closed"))
+            .ReturnsAsync(caseListResponse);
 
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
@@ -98,8 +143,10 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
 
         var result = await _handler.Handle(query, CancellationToken.None);
 
+        Assert.NotNull(result);
         Assert.True(result.Success);
-        Assert.Empty(result.ErrorMessages);
+        Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Closed"), Times.Once);
     }
 }
