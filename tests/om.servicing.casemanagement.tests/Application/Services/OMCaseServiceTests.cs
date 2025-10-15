@@ -290,4 +290,127 @@ public class OMCaseServiceTests
         Assert.StartsWith("CSP", result.Data.ReferenceNumber);
         Assert.True(result.Data.ReferenceNumber.Length == 18);
     }
+
+    [Fact]
+    public async Task CaseExistsWithIdAsync_ReturnsFalse_WhenIdIsNullOrWhitespace()
+    {
+        Assert.False(await _service.CaseExistsWithIdAsync(null));
+        Assert.False(await _service.CaseExistsWithIdAsync(""));
+        Assert.False(await _service.CaseExistsWithIdAsync("   "));
+        _caseRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CaseExistsWithIdAsync_ReturnsTrue_WhenCaseExists()
+    {
+        var caseId = "CASE123";
+        _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId)).ReturnsAsync(new OMCase { Id = caseId });
+        Assert.True(await _service.CaseExistsWithIdAsync(caseId));
+        _caseRepositoryMock.Verify(r => r.GetByIdAsync(caseId), Times.Once);
+    }
+
+    [Fact]
+    public async Task CaseExistsWithIdAsync_ReturnsFalse_WhenCaseDoesNotExist()
+    {
+        var caseId = "CASE123";
+        _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId)).ReturnsAsync((OMCase)null);
+        Assert.False(await _service.CaseExistsWithIdAsync(caseId));
+        _caseRepositoryMock.Verify(r => r.GetByIdAsync(caseId), Times.Once);
+    }
+
+    [Fact]
+    public async Task CaseExistsWithIdAsync_ReturnsFalse_AndLogs_WhenRepositoryThrows()
+    {
+        var caseId = "CASE123";
+        _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId)).ThrowsAsync(new Exception("DB error"));
+        Assert.False(await _service.CaseExistsWithIdAsync(caseId));
+        _loggingServiceMock.Verify(l => l.LogError(It.IsAny<string>(), It.IsAny<Exception>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CaseExistsWithReferenceNumberAsync_ReturnsFalse_WhenReferenceNumberIsNullOrWhitespace()
+    {
+        Assert.False(await _service.CaseExistsWithReferenceNumberAsync(null));
+        Assert.False(await _service.CaseExistsWithReferenceNumberAsync(""));
+        Assert.False(await _service.CaseExistsWithReferenceNumberAsync("   "));
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CaseExistsWithReferenceNumberAsync_ReturnsTrue_WhenCaseExists()
+    {
+        var referenceNumber = "REF123";
+        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()))
+            .ReturnsAsync(new List<OMCase> { new OMCase { ReferenceNumber = referenceNumber } });
+        Assert.True(await _service.CaseExistsWithReferenceNumberAsync(referenceNumber));
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CaseExistsWithReferenceNumberAsync_ReturnsFalse_WhenCaseDoesNotExist()
+    {
+        var referenceNumber = "REF123";
+        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()))
+            .ReturnsAsync(new List<OMCase>());
+        Assert.False(await _service.CaseExistsWithReferenceNumberAsync(referenceNumber));
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CaseExistsWithReferenceNumberAsync_ReturnsFalse_AndLogs_WhenRepositoryThrows()
+    {
+        var referenceNumber = "REF123";
+        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()))
+            .ThrowsAsync(new Exception("DB error"));
+        Assert.False(await _service.CaseExistsWithReferenceNumberAsync(referenceNumber));
+        _loggingServiceMock.Verify(l => l.LogError(It.IsAny<string>(), It.IsAny<Exception>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateCaseAsync_EnsuresUniqueIdAndReferenceNumber_BeforeAdd()
+    {
+        var dto = new OMCaseDto
+        {
+            Channel = "PublicWeb",
+            IdentificationNumber = "ID123",
+            Status = "Open"
+        };
+
+        // Simulate duplicate id and reference number on first check, then unique on second
+        var duplicateId = "DUPLICATE_ID";
+        var duplicateRef = "DUPLICATE_REF";
+        var uniqueId = "UNIQUE_ID";
+        var uniqueRef = "UNIQUE_REF";
+
+        // Setup initial id/ref
+        dto.Id = duplicateId;
+        dto.ReferenceNumber = duplicateRef;
+
+        // Setup repository to simulate duplicates, then unique
+        var idCallCount = 0;
+        _caseRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(() =>
+            {
+                idCallCount++;
+                return idCallCount == 1 ? new OMCase { Id = duplicateId } : null;
+            });
+
+        var refCallCount = 0;
+        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()))
+            .ReturnsAsync(() =>
+            {
+                refCallCount++;
+                return refCallCount == 1 ? new List<OMCase> { new OMCase { ReferenceNumber = duplicateRef } } : new List<OMCase>();
+            });
+
+        _caseRepositoryMock.Setup(r => r.AddAsync(It.IsAny<OMCase>())).Returns(Task.CompletedTask);
+
+        var result = await _service.CreateCaseAsync(dto);
+
+        Assert.NotNull(result);
+        Assert.True(result.Success);
+        _caseRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<string>()), Times.AtLeastOnce);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>()), Times.AtLeastOnce);
+        _caseRepositoryMock.Verify(r => r.AddAsync(It.IsAny<OMCase>()), Times.Once);
+    }
 }
