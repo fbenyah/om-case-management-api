@@ -1,13 +1,16 @@
 ﻿using MediatR;
 using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Dtos;
+using om.servicing.casemanagement.domain.Enums;
 using om.servicing.casemanagement.domain.Responses.Shared;
+using OM.RequestFramework.Core.Extensions;
 using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.application.Features.OMCases.Commands;
 
 public class CreateShellCaseCommand : IRequest<CreateShellCaseCommandResponse>
 {
+    public CaseChannel SourceChannel { get; set; } = CaseChannel.Unknown;
 }
 
 public class CreateShellCaseCommandResponse : ApplicationBaseResponse<BasicCaseCreateResponse>
@@ -36,7 +39,12 @@ public class CreateShellCaseCommandHandler : SharedFeatures, IRequestHandler<Cre
     {
         var response = new CreateShellCaseCommandResponse();
 
-        OMCaseDto omCaseDto = new();
+        OMCaseDto omCaseDto = new()
+        {
+            Channel = request.SourceChannel.GetDescription()
+        };
+
+        omCaseDto.Status = CaseStatus.Initiated.GetDescription();
 
         OMCaseCreateResponse createCaseserviceResponse = await _caseService.CreateCaseAsync(new OMCaseDto(), cancellationToken);
         if (!createCaseserviceResponse.Success)
