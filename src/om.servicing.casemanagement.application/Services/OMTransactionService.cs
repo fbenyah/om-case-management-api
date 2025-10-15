@@ -30,7 +30,7 @@ public class OMTransactionService : IOMTransactionService
     /// whitespace.</param>
     /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions for the specified case.  Returns
     /// an empty list if the <paramref name="caseId"/> is null, empty, or whitespace, or if no transactions are found.</returns>
-    public async Task<List<OMTransactionDto>> GetTransactionsForCaseByCaseIdAsync(string caseId)
+    public async Task<List<OMTransactionDto>> GetTransactionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(caseId))
         {
@@ -53,7 +53,7 @@ public class OMTransactionService : IOMTransactionService
     /// or consist only of whitespace.</param>
     /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions associated with the customer's
     /// cases. Returns an empty list if the customer has no cases or if the provided identification number is invalid.</returns>
-    public async Task<List<OMTransactionDto>> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber)
+    public async Task<List<OMTransactionDto>> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(customerIdentificationNumber))
         {
@@ -97,7 +97,7 @@ public class OMTransactionService : IOMTransactionService
     /// <param name="interactionId">The unique identifier of the interaction. This value cannot be null, empty, or consist only of whitespace.</param>
     /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions associated with the specified
     /// interaction. Returns an empty list if no transactions are found or if the input parameters are invalid.</returns>
-    public async Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId)
+    public async Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(customerIdentificationNumber) 
             || string.IsNullOrWhiteSpace(interactionId))

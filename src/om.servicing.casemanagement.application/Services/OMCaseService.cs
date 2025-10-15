@@ -35,7 +35,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases associated with the specified identification
     /// number. If the identification number is invalid or an error occurs, the response will include an appropriate
     /// error message or exception.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAsync(string identificationNumber)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAsync(string identificationNumber, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -47,7 +47,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.IdentificationNumber == identificationNumber);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.IdentificationNumber == identificationNumber, cancellationToken);
             response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
         }
         catch (Exception ex)
@@ -74,7 +74,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases matching the specified identification number
     /// and status. If no cases are found, the <see cref="OMCaseListResponse.Data"/> property will contain an empty
     /// list.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAndStatusAsync(string identityNumber, string status)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAndStatusAsync(string identityNumber, string status, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -87,7 +87,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.IdentificationNumber == identityNumber);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.IdentificationNumber == identityNumber, cancellationToken);
             response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
         }
         catch (Exception ex)
@@ -114,7 +114,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases matching the specified reference number. If no
     /// cases are found, the <see cref="OMCaseListResponse.Data"/> property will be an empty list. If an error occurs,
     /// the response will include an appropriate error message or exception.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAsync(string referenceNumber)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -126,7 +126,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
             response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
         }
         catch (Exception ex)
@@ -154,7 +154,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases that match the specified reference number and
     /// status. If no cases are found, the <see cref="OMCaseListResponse.Data"/> property will contain an empty list. If
     /// an error occurs, the response will include an appropriate error message or exception.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAndStatusAsync(string referenceNumber, string status)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAndStatusAsync(string referenceNumber, string status, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -167,7 +167,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.ReferenceNumber == referenceNumber);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.ReferenceNumber == referenceNumber, cancellationToken);
             response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
         }
         catch (Exception ex)
@@ -193,7 +193,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseCreateResponse"/> containing the reference number and ID of the created case.  If the input
     /// is <see langword="null"/> or an error occurs during case creation, the response will  indicate the failure and
     /// include relevant error details.</returns>
-    public async Task<OMCaseCreateResponse> CreateCaseAsync(OMCaseDto omCaseDto)
+    public async Task<OMCaseCreateResponse> CreateCaseAsync(OMCaseDto omCaseDto, CancellationToken cancellationToken = default)
     {
         OMCaseCreateResponse response = new();
 
@@ -209,13 +209,13 @@ public class OMCaseService : BaseService, IOMCaseService
         omCaseDto.Id = UlidUtils.NewUlidString();
         omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
 
-        await EnsureUniqueCaseIdAndReferenceNumber(omCaseDto, channel, operationalBusinessSegment);
+        await EnsureUniqueCaseIdAndReferenceNumber(omCaseDto, channel, operationalBusinessSegment, cancellationToken);
 
         OMCase omCase = DtoToEntityMapper.ToEntity(omCaseDto);
 
         try
         {
-            await _caseRepository.AddAsync(omCase);
+            await _caseRepository.AddAsync(omCase, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -240,7 +240,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns><see langword="true"/> if a case with the specified ID exists; otherwise, <see langword="false"/>. Returns <see
     /// langword="false"/> if the <paramref name="caseId"/> is null, empty, or whitespace, or if an error occurs during
     /// the operation.</returns>
-    public async Task<bool> CaseExistsWithIdAsync(string caseId)
+    public async Task<bool> CaseExistsWithIdAsync(string caseId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(caseId))
         {
@@ -249,7 +249,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            OMCase? omCase = await _caseRepository.GetByIdAsync(caseId);
+            OMCase? omCase = await _caseRepository.GetByIdAsync(caseId, cancellationToken);
             if (omCase != null)
             {
                 return true;
@@ -272,7 +272,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// exception occurs during the operation.</remarks>
     /// <param name="referenceNumber">The reference number of the case to check. Cannot be null, empty, or whitespace.</param>
     /// <returns><see langword="true"/> if a case with the specified reference number exists; otherwise, <see langword="false"/>.</returns>
-    public async Task<bool> CaseExistsWithReferenceNumberAsync(string referenceNumber)
+    public async Task<bool> CaseExistsWithReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(referenceNumber))
         {
@@ -281,7 +281,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase>? omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber);
+            IEnumerable<OMCase>? omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
             if (omCases != null && omCases?.Count() > 0)
             {
                 return true;
@@ -307,11 +307,11 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <param name="channel">The channel associated with the case, used to generate a unique reference number.</param>
     /// <param name="operationalBusinessSegment">The operational business segment associated with the case, used to generate a unique reference number.</param>
     /// <returns></returns>
-    private async Task EnsureUniqueCaseIdAndReferenceNumber(OMCaseDto omCaseDto, CaseChannel channel, OperationalBusinessSegment operationalBusinessSegment)
+    private async Task EnsureUniqueCaseIdAndReferenceNumber(OMCaseDto omCaseDto, CaseChannel channel, OperationalBusinessSegment operationalBusinessSegment, CancellationToken cancellationToken = default)
     {
         // ensure that there is no existing case with the same id
         // if there is, generate a new id and keep checking till it is unique
-        while (await CaseExistsWithIdAsync(omCaseDto.Id))
+        while (await CaseExistsWithIdAsync(omCaseDto.Id, cancellationToken))
         {
             omCaseDto.Id = UlidUtils.NewUlidString();
             omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
@@ -319,7 +319,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         // ensure that there is no existing case with the same reference number
         // if there is, generate a new reference number and keep checking till it is unique
-        while (await CaseExistsWithReferenceNumberAsync(omCaseDto.ReferenceNumber))
+        while (await CaseExistsWithReferenceNumberAsync(omCaseDto.ReferenceNumber, cancellationToken))
         {
             omCaseDto.Id = UlidUtils.NewUlidString();
             omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);

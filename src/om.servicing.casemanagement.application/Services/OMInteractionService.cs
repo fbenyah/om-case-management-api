@@ -29,7 +29,7 @@ public class OMInteractionService : IOMInteractionService
     /// whitespace.</param>
     /// <returns>A list of <see cref="OMInteractionDto"/> objects representing the interactions for the specified case. Returns
     /// an empty list if the <paramref name="caseId"/> is null, empty, or whitespace, or if no interactions are found.</returns>
-    public async Task<List<OMInteractionDto>> GetInteractionsForCaseByCaseIdAsync(string caseId)
+    public async Task<List<OMInteractionDto>> GetInteractionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(caseId))
         {
@@ -51,7 +51,7 @@ public class OMInteractionService : IOMInteractionService
     /// whitespace.</param>
     /// <returns>A list of <see cref="OMInteractionDto"/> objects representing the interactions associated with the customer's
     /// cases. Returns an empty list if the customer has no cases or if the provided identification number is invalid.</returns>
-    public async Task<List<OMInteractionDto>> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber)
+    public async Task<List<OMInteractionDto>> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(customerIdentificationNumber))
         {

@@ -11,7 +11,7 @@ public interface IOMTransactionService
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see
     /// cref="OMTransactionDto"/> objects  representing the transactions for the specified case. Returns an empty list
     /// if no transactions are found.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForCaseByCaseIdAsync(string caseId);
+    Task<List<OMTransactionDto>> GetTransactionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific case, filtered by the customer's identification
@@ -22,7 +22,7 @@ public interface IOMTransactionService
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of  <see
     /// cref="OMTransactionDto"/> objects representing the transactions for the specified customer. If no transactions
     /// are found, the list will be empty.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber);
+    Task<List<OMTransactionDto>> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific interaction and customer identification number.
@@ -36,5 +36,5 @@ public interface IOMTransactionService
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see
     /// cref="OMTransactionDto"/> objects representing the transactions associated with the specified customer and
     /// interaction. If no transactions are found, the list will be empty.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId);
+    Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, CancellationToken cancellationToken = default);
 }
