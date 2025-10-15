@@ -34,7 +34,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("The Case Id is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync(It.IsAny<string>()), Times.Never);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         };
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("case123"))
+            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("case123", CancellationToken.None))
             .ReturnsAsync(transactions);
 
         var query = new GetTransactionsForCaseByCaseIdQuery { CaseId = "case123" };
@@ -55,14 +55,14 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(transactions, result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("case123"), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("case123", CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ReturnsEmptyList_WhenNoTransactionsFound()
     {
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("case456"))
+            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("case456", CancellationToken.None))
             .ReturnsAsync(new List<OMTransactionDto>());
 
         var query = new GetTransactionsForCaseByCaseIdQuery { CaseId = "case456" };
@@ -71,6 +71,6 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("case456"), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("case456", CancellationToken.None), Times.Once);
     }
 }

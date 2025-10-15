@@ -28,19 +28,19 @@ public class OMInteractionServiceTests
     {
         var result = await _service.GetInteractionsForCaseByCaseIdAsync(caseId);
         Assert.Empty(result);
-        _mockInteractionRepo.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>()), Times.Never);
+        _mockInteractionRepo.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task GetInteractionsForCaseByCaseIdAsync_ReturnsEmptyList_WhenNoInteractionsFound()
     {
         _mockInteractionRepo
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Enumerable.Empty<OMInteraction>());
 
         var result = await _service.GetInteractionsForCaseByCaseIdAsync("case123");
         Assert.Empty(result);
-        _mockInteractionRepo.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>()), Times.Once);
+        _mockInteractionRepo.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class OMInteractionServiceTests
     };
 
         _mockInteractionRepo
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(interactions);
 
         var result = await _service.GetInteractionsForCaseByCaseIdAsync("case123");
@@ -70,19 +70,19 @@ public class OMInteractionServiceTests
     {
         var result = await _service.GetInteractionsForCaseByCustomerIdentificationAsync(customerId);
         Assert.Empty(result);
-        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()), Times.Never);
+        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task GetInteractionsForCaseByCustomerIdentificationAsync_ReturnsEmptyList_WhenNoCasesFound()
     {
         _mockCaseService
-            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()))
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new OMCaseListResponse());
 
         var result = await _service.GetInteractionsForCaseByCustomerIdentificationAsync("cust123");
         Assert.Empty(result);
-        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"), Times.Once);
+        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -98,21 +98,21 @@ public class OMInteractionServiceTests
         };
 
         _mockCaseService
-            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"))
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(cases);
 
         _mockInteractionRepo
-            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(expr => expr.Compile().Invoke(new OMInteraction { CaseId = "case1" }))))
+            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(expr => expr.Compile().Invoke(new OMInteraction { CaseId = "case1" })), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OMInteraction> { new OMInteraction { CaseId = "case1", Notes = "Note1", Status = "Active" } });
 
         _mockInteractionRepo
-            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(expr => expr.Compile().Invoke(new OMInteraction { CaseId = "case2" }))))
+            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMInteraction, bool>>>(expr => expr.Compile().Invoke(new OMInteraction { CaseId = "case2" })), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OMInteraction> { new OMInteraction { CaseId = "case2", Notes = "Note2", Status = "Closed" } });
 
-        var result = await _service.GetInteractionsForCaseByCustomerIdentificationAsync("cust123");
+        var result = await _service.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", It.IsAny<CancellationToken>());
         Assert.Equal(2, result.Count);
         Assert.Contains(result, i => i.Notes == "Note1");
         Assert.Contains(result, i => i.Notes == "Note2");
-        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"), Times.Once);
+        _mockCaseService.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123", It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -42,12 +42,12 @@ public class GetTransactionsForInteractionByCustomerIdentificationQueryHandlerTe
         if (string.IsNullOrWhiteSpace(customerId))
         {
             Assert.Contains("Customer identification number is required.", result.ErrorMessages);
-            _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
         else
         {
             Assert.Contains("Interaction ID is required.", result.ErrorMessages);
-            _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
         Assert.Empty(result.Data);
     }
@@ -61,7 +61,7 @@ public class GetTransactionsForInteractionByCustomerIdentificationQueryHandlerTe
         };
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int456"))
+            .Setup(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int456", CancellationToken.None))
             .ReturnsAsync(transactions);
 
         var query = new GetTransactionsForInteractionByCustomerIdentificationQuery
@@ -74,14 +74,14 @@ public class GetTransactionsForInteractionByCustomerIdentificationQueryHandlerTe
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(transactions, result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int456"), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int456", CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ReturnsEmptyList_WhenNoTransactionsFound()
     {
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust789", "int101"))
+            .Setup(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust789", "int101", CancellationToken.None))
             .ReturnsAsync(new List<OMTransactionDto>());
 
         var query = new GetTransactionsForInteractionByCustomerIdentificationQuery
@@ -94,6 +94,6 @@ public class GetTransactionsForInteractionByCustomerIdentificationQueryHandlerTe
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust789", "int101"), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForInteractionByCustomerIdentificationAsync("cust789", "int101", CancellationToken.None), Times.Once);
     }
 }

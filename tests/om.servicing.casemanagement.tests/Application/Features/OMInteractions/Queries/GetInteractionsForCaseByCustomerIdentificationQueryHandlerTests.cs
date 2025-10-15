@@ -34,7 +34,7 @@ public class GetInteractionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("Customer Identification Number is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync(It.IsAny<string>()), Times.Never);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync(It.IsAny<string>(), CancellationToken.None), Times.Never);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class GetInteractionsForCaseByCustomerIdentificationQueryHandlerTests
     };
 
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"))
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None))
             .ReturnsAsync(interactions);
 
         var query = new GetInteractionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "cust123" };
@@ -55,14 +55,14 @@ public class GetInteractionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(interactions, result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ReturnsEmptyList_WhenNoInteractionsFound()
     {
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust456"))
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust456", CancellationToken.None))
             .ReturnsAsync(new List<OMInteractionDto>());
 
         var query = new GetInteractionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "cust456" };
@@ -71,6 +71,6 @@ public class GetInteractionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust456"), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust456", CancellationToken.None), Times.Once);
     }
 }

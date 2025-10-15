@@ -34,7 +34,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("Case Id is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync(It.IsAny<string>()), Times.Never);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         };
 
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case123"))
+            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case123", CancellationToken.None))
             .ReturnsAsync(interactions);
 
         var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "case123" };
@@ -55,14 +55,14 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(interactions, result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case123"), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case123", CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ReturnsEmptyList_WhenNoInteractionsFound()
     {
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case456"))
+            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case456", CancellationToken.None))
             .ReturnsAsync(new List<OMInteractionDto>());
 
         var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "case456" };
@@ -71,6 +71,6 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case456"), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case456", CancellationToken.None), Times.Once);
     }
 }

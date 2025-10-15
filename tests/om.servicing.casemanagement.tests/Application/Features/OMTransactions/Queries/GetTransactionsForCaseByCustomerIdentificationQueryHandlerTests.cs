@@ -34,7 +34,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("Customer identification number is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync(It.IsAny<string>()), Times.Never);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         };
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123"))
+            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None))
             .ReturnsAsync(transactions);
 
         var query = new GetTransactionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "cust123" };
@@ -55,14 +55,14 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(transactions, result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123"), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ReturnsEmptyList_WhenNoTransactionsFound()
     {
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust456"))
+            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust456", CancellationToken.None))
             .ReturnsAsync(new List<OMTransactionDto>());
 
         var query = new GetTransactionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "cust456" };
@@ -71,6 +71,6 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust456"), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust456", CancellationToken.None), Times.Once);
     }
 }

@@ -37,7 +37,7 @@ public class OMTransactionServiceTests
     public async Task GetTransactionsForCaseByCaseIdAsync_NoTransactions_ReturnsEmptyList()
     {
         _transactionRepoMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Enumerable.Empty<OMTransaction>());
         var result = await _service.GetTransactionsForCaseByCaseIdAsync("case123");
         Assert.Empty(result);
@@ -51,7 +51,7 @@ public class OMTransactionServiceTests
         new OMTransaction { CaseId = "case123", ReceivedDetails = "R", ProcessedDetails = "P", IsImmediate = true, Status = "Active" }
     };
         _transactionRepoMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(transactions);
 
         var result = await _service.GetTransactionsForCaseByCaseIdAsync("case123");
@@ -76,7 +76,7 @@ public class OMTransactionServiceTests
     [Fact]
     public async Task GetTransactionsForCaseByCustomerIdentificationAsync_NoCases_ReturnsEmptyList()
     {
-        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()))
+        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new OMCaseListResponse());
         var result = await _service.GetTransactionsForCaseByCustomerIdentificationAsync("cust123");
         Assert.Empty(result);
@@ -85,10 +85,10 @@ public class OMTransactionServiceTests
     [Fact]
     public async Task GetTransactionsForCaseByCustomerIdentificationAsync_CasesWithNoTransactions_ReturnsEmptyList()
     {
-        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>()))
+        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new OMCaseListResponse { Data = new List<OMCaseDto> { new OMCaseDto { Channel = "Web", IdentificationNumber = "cust123" } } });
         _transactionRepoMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Enumerable.Empty<OMTransaction>());
         var result = await _service.GetTransactionsForCaseByCustomerIdentificationAsync("cust123");
         Assert.Empty(result);
@@ -106,21 +106,21 @@ public class OMTransactionServiceTests
             }
         };
 
-        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123")).ReturnsAsync(cases);
+        _caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123", It.IsAny<CancellationToken>())).ReturnsAsync(cases);
 
         _transactionRepoMock
-            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(expr => expr.Compile().Invoke(new OMTransaction { CaseId = "case1" }))))
+            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(expr => expr.Compile().Invoke(new OMTransaction { CaseId = "case1" })), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OMTransaction> { new OMTransaction { CaseId = "case1", ReceivedDetails = "R1", ProcessedDetails = "P1", IsImmediate = true, Status = "Active" } });
 
         _transactionRepoMock
-            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(expr => expr.Compile().Invoke(new OMTransaction { CaseId = "case2" }))))
+            .Setup(r => r.FindAsync(It.Is<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(expr => expr.Compile().Invoke(new OMTransaction { CaseId = "case2" })), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OMTransaction> { new OMTransaction { CaseId = "case2", ReceivedDetails = "R2", ProcessedDetails = "P2", IsImmediate = false, Status = "Inactive" } });
 
         var result = await _service.GetTransactionsForCaseByCustomerIdentificationAsync("cust123");
         Assert.Equal(2, result.Count);
         Assert.Contains(result, t => t.ReceivedDetails == "R1" && t.ProcessedDetails == "P1");
         Assert.Contains(result, t => t.ReceivedDetails == "R2" && t.ProcessedDetails == "P2");
-        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123"), Times.Once);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("cust123", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public class OMTransactionServiceTests
     public async Task GetTransactionsForInteractionByCustomerIdentificationAsync_NoInteractions_ReturnsEmptyList()
     {
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync(It.IsAny<string>()))
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OMInteractionDto>());
         var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int123");
         Assert.Empty(result);
@@ -158,7 +158,7 @@ public class OMTransactionServiceTests
         };
 
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"))
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(interactions);
 
         var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int123");
@@ -180,7 +180,7 @@ public class OMTransactionServiceTests
             Case = new OMCaseDto { Id = "case123" }
         };
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"))
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OMInteractionDto> { interaction });
 
         var repoTransactions = new List<OMTransaction>
@@ -188,7 +188,7 @@ public class OMTransactionServiceTests
             new OMTransaction { CaseId = "case123", ReceivedDetails = "R2", ProcessedDetails = "P2", IsImmediate = false, Status = "Inactive" }
         };
         _transactionRepoMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(repoTransactions);
 
         var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int123");
@@ -218,7 +218,7 @@ public class OMTransactionServiceTests
             Case = new OMCaseDto { Id = "case456" }
         };
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123"))
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OMInteractionDto> { interactionWithTransactions, interactionWithoutTransactions });
 
         var repoTransactions = new List<OMTransaction>
@@ -226,7 +226,7 @@ public class OMTransactionServiceTests
             new OMTransaction { CaseId = "case456", ReceivedDetails = "R2", ProcessedDetails = "P2", IsImmediate = false, Status = "Inactive" }
         };
         _transactionRepoMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMTransaction, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(repoTransactions);
 
         var result = await _service.GetTransactionsForInteractionByCustomerIdentificationAsync("cust123", "int123");
