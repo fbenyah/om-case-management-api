@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using om.servicing.casemanagement.application.Features.OMCases.Commands;
 using om.servicing.casemanagement.application.Features.OMCases.Queries;
 using om.servicing.casemanagement.domain.Constants;
 using om.servicing.casemanagement.domain.Responses.Shared;
@@ -17,7 +18,7 @@ public class CaseContoller : BaseController
     [HttpGet]
     [Route("by/identification/{identificationNumber}")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCustomerCasesByIdentificationNumberResponse))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(BaseFluentValidationError), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -41,7 +42,7 @@ public class CaseContoller : BaseController
     [HttpGet]
     [Route("by/identification/{identificationNumber}/status/{status}")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCustomerCasesByIdentificationNumberAndStatusResponse))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(BaseFluentValidationError), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -59,5 +60,24 @@ public class CaseContoller : BaseController
         });
 
         return HandleApplicationEnterpriseResponse<GetCustomerCasesByIdentificationNumberAndStatusResponse>(response);
+    }
+
+    [SwaggerOperation(
+        Summary = "Create a shell case.",
+        Description = @"This request creates a shell case with the only details being the id and reference number of the case.")]
+    [HttpPost]
+    [Route("create/shell")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateShellCaseCommandResponse))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(BaseFluentValidationError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> CreateShellCase(
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] string sourceSystem)
+    {
+        CreateShellCaseCommandResponse response = await Mediator.Send(new CreateShellCaseCommand());
+        return HandleApplicationEnterpriseResponse<CreateShellCaseCommandResponse>(response);
     }
 }
