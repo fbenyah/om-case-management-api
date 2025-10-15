@@ -2,6 +2,7 @@
 using om.servicing.casemanagement.application.Features.OMCases.Commands;
 using om.servicing.casemanagement.application.Features.OMCases.Queries;
 using om.servicing.casemanagement.domain.Constants;
+using om.servicing.casemanagement.domain.Enums;
 using om.servicing.casemanagement.domain.Responses.Shared;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -25,7 +26,7 @@ public class CaseContoller : BaseController
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> GetCustomerCasesByIdentification(
-        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] string sourceSystem, 
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem, 
         string identificationNumber)
     {
         GetCustomerCasesByIdentificationNumberResponse response = await Mediator.Send(new GetCustomerCasesByIdentificationNumberQuery
@@ -49,7 +50,7 @@ public class CaseContoller : BaseController
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> GetCustomerCasesByIdentificationAndStatus(
-        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] string sourceSystem,
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
         string identificationNumber,
         string status)
     {
@@ -75,9 +76,29 @@ public class CaseContoller : BaseController
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CreateShellCase(
-        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] string sourceSystem)
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem)
     {
-        CreateShellCaseCommandResponse response = await Mediator.Send(new CreateShellCaseCommand());
+        CreateShellCaseCommandResponse response = await Mediator.Send(new CreateShellCaseCommand() { SourceChannel = sourceSystem } );
         return HandleApplicationEnterpriseResponse<CreateShellCaseCommandResponse>(response);
+    }
+
+    [SwaggerOperation(
+        Summary = "Create a case.",
+        Description = @"This request creates a case using the customer identification provided.")]
+    [HttpPost]
+    [Route("create")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateOMCaseCommandResponse))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(BaseFluentValidationError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> CreateOMCase(
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XCustomerId)] string customerIdentificationNumber)
+    {
+        CreateOMCaseCommandResponse response = await Mediator.Send(new CreateOMCaseCommand() { SourceChannel = sourceSystem, IdentificationNumber = customerIdentificationNumber });
+        return HandleApplicationEnterpriseResponse<CreateOMCaseCommandResponse>(response);
     }
 }
