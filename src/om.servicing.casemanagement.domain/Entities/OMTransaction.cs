@@ -35,7 +35,19 @@ public class OMTransaction : BaseEntityWithReferenceNumberAndStatus
 
     [Required]
     [Column("is_immediate")]
-    public bool IsImmediate { get; set; }
+    public bool IsImmediate { get; set; } = false;
+
+    [Required]
+    [Column("is_fulfilled_externally")]
+    public bool IsFulfilledExternally { get; set; } = false;
+
+    [MaxLength(50)]
+    [Column("external_system")]
+    public string ExternalSystem { get; set; }
+
+    [MaxLength(50)]
+    [Column("external_system_id")]
+    public string ExternalSystemId { get; set; }
 
     [Required]
     [Column("received_details", TypeName = "text")]

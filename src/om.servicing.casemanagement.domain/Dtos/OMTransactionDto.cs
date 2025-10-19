@@ -12,7 +12,10 @@ public class OMTransactionDto : BaseDtoWithReferenceNumberAndStatus
     public OMCaseDto? Case { get; set; } = null;
     public OMInteractionDto? Interaction { get; set; } = null;
     public OMTransactionTypeDto? TransactionType { get; set; } = null;    
-    public bool IsImmediate { get; set; }
+    public bool IsImmediate { get; set; } = false;
+    public bool IsFulfilledExternally { get; set; } = false;
+    public string ExternalSystem { get; set; } = string.Empty;
+    public string ExternalSystemId { get; set; } = string.Empty;
     public string ReceivedDetails { get; set; } = string.Empty;
     public string ProcessedDetails { get; set; } = string.Empty;
 }
