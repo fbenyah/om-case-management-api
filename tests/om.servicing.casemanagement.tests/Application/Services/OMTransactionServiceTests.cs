@@ -149,7 +149,7 @@ public class OMTransactionServiceTests
     {
         var transactions = new List<OMTransactionDto>
         {
-            new OMTransactionDto { ReceivedDetails = "R1", ProcessedDetails = "P1", IsImmediate = true, Status = "Active" }
+            new OMTransactionDto { ReceivedDetails = "R1", ProcessedDetails = "P1", IsImmediate = true, IsFulfilledExternally = false, Status = "Active" }
         };
 
         var interactions = new List<OMInteractionDto>
@@ -167,6 +167,7 @@ public class OMTransactionServiceTests
         Assert.Equal("R1", result[0].ReceivedDetails);
         Assert.Equal("P1", result[0].ProcessedDetails);
         Assert.True(result[0].IsImmediate);
+        Assert.False(result[0].IsFulfilledExternally);
         Assert.Equal("Active", result[0].Status);
     }
 
