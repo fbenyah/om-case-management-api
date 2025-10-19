@@ -38,6 +38,30 @@ public class CaseContoller : BaseController
     }
 
     [SwaggerOperation(
+        Summary = "Customer cases by reference number.",
+        Description = @"This request gets all customer cases given the reference number linked to that case.")]
+    [HttpGet]
+    [Route("by/identification/{identificationNumber}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCustomerCasesByReferenceNumberResponse))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(BaseFluentValidationError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> GetCustomerCasesByReference(
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
+        string referenceNumber)
+    {
+        GetCustomerCasesByReferenceNumberResponse response = await Mediator.Send(new GetCustomerCasesByReferenceNumberQuery
+        {
+            ReferenceNumber = referenceNumber
+        });
+
+        return HandleApplicationEnterpriseResponse<GetCustomerCasesByReferenceNumberResponse>(response);
+    }
+
+    [SwaggerOperation(
         Summary = "Customer cases by indentification number and case status.",
         Description = @"This request gets all customer cases given a particular status and the identification number linked to that case.")]
     [HttpGet]
