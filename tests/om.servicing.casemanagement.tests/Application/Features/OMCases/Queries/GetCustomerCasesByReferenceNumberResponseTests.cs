@@ -3,12 +3,12 @@ using om.servicing.casemanagement.domain.Dtos;
 
 namespace om.servicing.casemanagement.tests.Application.Features.OMCases.Queries;
 
-public class GetCustomerCasesByIdentificationNumberResponseTests
+public class GetCustomerCasesByReferenceNumberResponseTests
 {
     [Fact]
     public void Constructor_InitializesDataToEmptyList()
     {
-        var response = new GetCustomerCasesByIdentificationNumberResponse();
+        var response = new GetCustomerCasesByReferenceNumberResponse();
         Assert.NotNull(response.Data);
         Assert.Empty(response.Data);
     }
@@ -20,7 +20,7 @@ public class GetCustomerCasesByIdentificationNumberResponseTests
         {
             new OMCaseDto { Channel = "Email", ReferenceNumber = "ref1234", IdentificationNumber = "123", Status = "Open" }
         };
-        var response = new GetCustomerCasesByIdentificationNumberResponse
+        var response = new GetCustomerCasesByReferenceNumberResponse
         {
             Data = cases
         };
@@ -34,7 +34,7 @@ public class GetCustomerCasesByIdentificationNumberResponseTests
     [Fact]
     public void SetOrUpdateErrorMessage_AddsErrorMessageAndSetsSuccessFalse()
     {
-        var response = new GetCustomerCasesByIdentificationNumberResponse();
+        var response = new GetCustomerCasesByReferenceNumberResponse();
         response.SetOrUpdateErrorMessage("Test error");
         Assert.Contains("Test error", response.ErrorMessages);
         Assert.False(response.Success);
@@ -43,7 +43,7 @@ public class GetCustomerCasesByIdentificationNumberResponseTests
     [Fact]
     public void SetOrUpdateErrorMessages_AddsMultipleErrorMessages()
     {
-        var response = new GetCustomerCasesByIdentificationNumberResponse();
+        var response = new GetCustomerCasesByReferenceNumberResponse();
         var errors = new List<string> { "Error 1", "Error 2" };
         response.SetOrUpdateErrorMessages(errors);
         Assert.Contains("Error 1", response.ErrorMessages);
@@ -54,7 +54,7 @@ public class GetCustomerCasesByIdentificationNumberResponseTests
     [Fact]
     public void Success_IsTrueByDefault()
     {
-        var response = new GetCustomerCasesByIdentificationNumberResponse();
+        var response = new GetCustomerCasesByReferenceNumberResponse();
         Assert.True(response.Success);
     }
 }
