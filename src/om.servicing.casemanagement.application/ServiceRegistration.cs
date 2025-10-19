@@ -29,7 +29,9 @@ public static class ServiceRegistration
 
 
             // Register application services here
-            .AddScoped<IOMCaseService, OMCaseService>();
+            .AddTransient<IOMCaseService, OMCaseService>()
+            .AddTransient<IOMTransactionService, OMTransactionService>()
+            .AddTransient<IOMInteractionService, OMInteractionService>();
 
         return services;
     }
