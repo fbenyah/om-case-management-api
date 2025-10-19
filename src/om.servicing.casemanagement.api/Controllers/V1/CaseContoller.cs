@@ -41,7 +41,7 @@ public class CaseContoller : BaseController
         Summary = "Customer cases by reference number.",
         Description = @"This request gets all customer cases given the reference number linked to that case.")]
     [HttpGet]
-    [Route("by/identification/{identificationNumber}")]
+    [Route("by/reference/{referenceNumber}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCustomerCasesByReferenceNumberResponse))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -85,6 +85,32 @@ public class CaseContoller : BaseController
         });
 
         return HandleApplicationEnterpriseResponse<GetCustomerCasesByIdentificationNumberAndStatusResponse>(response);
+    }
+
+    [SwaggerOperation(
+        Summary = "Customer cases by reference number and case status.",
+        Description = @"This request gets all customer cases given a particular status and the reference number linked to that case.")]
+    [HttpGet]
+    [Route("by/reference/{referenceNumber}/status/{status}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCustomerCasesByIdentificationNumberAndStatusResponse))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(BaseFluentValidationError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> GetCustomerCasesByReferenceAndStatus(
+        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
+        string referenceNumber,
+        string status)
+    {
+        GetCustomerCasesByReferenceNumberAndStatusResponse response = await Mediator.Send(new GetCustomerCasesByReferenceNumberAndStatusQuery
+        {
+            ReferenceNumber = referenceNumber,
+            Status = status
+        });
+
+        return HandleApplicationEnterpriseResponse<GetCustomerCasesByReferenceNumberAndStatusResponse>(response);
     }
 
     [SwaggerOperation(
