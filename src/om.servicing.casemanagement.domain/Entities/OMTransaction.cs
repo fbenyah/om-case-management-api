@@ -43,11 +43,11 @@ public class OMTransaction : BaseEntityWithReferenceNumberAndStatus
 
     [MaxLength(50)]
     [Column("external_system")]
-    public string ExternalSystem { get; set; }
+    public string ExternalSystem { get; set; } = string.Empty;
 
     [MaxLength(50)]
     [Column("external_system_id")]
-    public string ExternalSystemId { get; set; }
+    public string ExternalSystemId { get; set; } = string.Empty;
 
     [Required]
     [Column("received_details", TypeName = "text")]
