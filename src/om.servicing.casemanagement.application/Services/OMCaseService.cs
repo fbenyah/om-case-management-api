@@ -238,14 +238,17 @@ public class OMCaseService : BaseService, IOMCaseService
     /// </summary>
     /// <remarks>This method logs an error if an exception occurs while accessing the repository.</remarks>
     /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
-    /// <returns><see langword="true"/> if a case with the specified ID exists; otherwise, <see langword="false"/>. Returns <see
-    /// langword="false"/> if the <paramref name="caseId"/> is null, empty, or whitespace, or if an error occurs during
+    /// <returns><see cref="OMCaseExistsResponse"/> if a case with the specified ID exists; otherwise, <see cref="OMCaseExistsResponse"/>. Returns <see
+    /// cref="OMCaseExistsResponse"/> if the <paramref name="caseId"/> is null, empty, or whitespace, or if an error occurs during
     /// the operation.</returns>
-    public async Task<bool> CaseExistsWithIdAsync(string caseId, CancellationToken cancellationToken = default)
+    public async Task<OMCaseExistsResponse> CaseExistsWithIdAsync(string caseId, CancellationToken cancellationToken = default)
     {
+        OMCaseExistsResponse response = new();
+
         if (string.IsNullOrWhiteSpace(caseId))
         {
-            return false;
+            response.SetOrUpdateErrorMessage("Case Id is required.");
+            return response;
         }
 
         try
@@ -253,31 +256,36 @@ public class OMCaseService : BaseService, IOMCaseService
             OMCase? omCase = await _caseRepository.GetByIdAsync(caseId, cancellationToken);
             if (omCase != null)
             {
-                return true;
+                response.Data = true;
+                return response;
             }
         }
         catch (Exception ex)
         {
             string errorMessage = $"An error occurred while checking existence of case with ID '{caseId}'. {ex.Message}";
             _loggingService.LogError(errorMessage, ex);
-            return false;
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
         }
-        return false;
+        return response;
     }
 
     /// <summary>
     /// Asynchronously determines whether a case with the specified reference number exists.
     /// </summary>
     /// <remarks>If the <paramref name="referenceNumber"/> is null, empty, or consists only of whitespace, the
-    /// method immediately returns <see langword="false"/>. Logs an error and returns <see langword="false"/> if an
+    /// method immediately returns <see cref="OMCaseExistsResponse"/>. Logs an error and returns <see cref="OMCaseExistsResponse"/> if an
     /// exception occurs during the operation.</remarks>
     /// <param name="referenceNumber">The reference number of the case to check. Cannot be null, empty, or whitespace.</param>
-    /// <returns><see langword="true"/> if a case with the specified reference number exists; otherwise, <see langword="false"/>.</returns>
-    public async Task<bool> CaseExistsWithReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default)
+    /// <returns><see cref="OMCaseExistsResponse"/> if a case with the specified reference number exists; otherwise, <see cref="OMCaseExistsResponse"/>.</returns>
+    public async Task<OMCaseExistsResponse> CaseExistsWithReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default)
     {
+        OMCaseExistsResponse response = new();
+
         if (string.IsNullOrWhiteSpace(referenceNumber))
         {
-            return false;
+            response.SetOrUpdateErrorMessage("Reference number is required.");
+            return response;
         }
 
         try
@@ -285,16 +293,18 @@ public class OMCaseService : BaseService, IOMCaseService
             IEnumerable<OMCase>? omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
             if (omCases != null && omCases?.Count() > 0)
             {
-                return true;
+                response.Data = true;
+                return response;
             }
         }
         catch (Exception ex)
         {
             string errorMessage = $"An error occurred while checking existence of case with reference number '{referenceNumber}'. {ex.Message}";
             _loggingService.LogError(errorMessage, ex);
-            return false;
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
         }
-        return false;
+        return response;
     }
 
     /// <summary>
