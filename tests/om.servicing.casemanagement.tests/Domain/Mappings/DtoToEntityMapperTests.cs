@@ -75,6 +75,9 @@ public class DtoToEntityMapperTests
             Status = "Processed",
             ReferenceNumber = "ref1234",
             IsImmediate = true,
+            IsFulfilledExternally = false,
+            ExternalSystem = "Bizagi",
+            ExternalSystemId = "CED345678",
             ReceivedDetails = "Received",
             ProcessedDetails = "Processed",
             TransactionType = null,
@@ -146,6 +149,9 @@ public class DtoToEntityMapperTests
             UpdateDate = DateTime.UtcNow,
             Status = "Processed",
             IsImmediate = false,
+            IsFulfilledExternally = false,
+            ExternalSystem = "Bizagi",
+            ExternalSystemId = "CED345678",
             ReferenceNumber = "ref1234",
             ReceivedDetails = "Received",
             ProcessedDetails = "Processed",
@@ -159,6 +165,9 @@ public class DtoToEntityMapperTests
         entity.Id.Should().Be(dto.Id);
         entity.Status.Should().Be(dto.Status);
         entity.IsImmediate.Should().Be(dto.IsImmediate);
+        entity.IsFulfilledExternally.Should().Be(dto.IsFulfilledExternally);
+        entity.ExternalSystem.Should().Be(dto.ExternalSystem);
+        entity.ExternalSystemId.Should().Be(dto.ExternalSystemId);
         entity.ReferenceNumber.Should().Be(dto.ReferenceNumber);
         entity.TransactionType.Should().NotBeNull();
         entity.TransactionType.Name.Should().Be(transactionTypeDto.Name);

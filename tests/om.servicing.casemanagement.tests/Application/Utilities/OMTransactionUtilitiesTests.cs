@@ -27,7 +27,7 @@ public class OMTransactionUtilitiesTests
     {
         var transactions = new List<OMTransaction>
         {
-            new OMTransaction { CaseId = "C1", InteractionId = "I1", TransactionTypeId = "T1", IsImmediate = true, ReceivedDetails = "R1", ProcessedDetails = "P1", Status = "Active" }
+            new OMTransaction { CaseId = "C1", InteractionId = "I1", TransactionTypeId = "T1", IsImmediate = true, IsFulfilledExternally = true, ExternalSystem = "Bizagi", ExternalSystemId = "CED12345", ReceivedDetails = "R1", ProcessedDetails = "P1", Status = "Active" }
         };
 
         // Arrange: Mock the mapper if possible, otherwise rely on actual mapping
@@ -37,6 +37,9 @@ public class OMTransactionUtilitiesTests
         Assert.Equal("R1", result[0].ReceivedDetails);
         Assert.Equal("P1", result[0].ProcessedDetails);
         Assert.Equal(true, result[0].IsImmediate);
+        Assert.Equal(true, result[0].IsFulfilledExternally);
+        Assert.Equal("Bizagi", result[0].ExternalSystem);
+        Assert.Equal("CED12345", result[0].ExternalSystemId);
         Assert.Equal("Active", result[0].Status);
     }
 
@@ -61,7 +64,7 @@ public class OMTransactionUtilitiesTests
     {
         var dtos = new List<OMTransactionDto>
         {
-            new OMTransactionDto { ReceivedDetails = "R2", ProcessedDetails = "P2", IsImmediate = false, Status = "Inactive" }
+            new OMTransactionDto { ReceivedDetails = "R2", ProcessedDetails = "P2", IsImmediate = false, IsFulfilledExternally = false, Status = "Inactive" }
         };
 
         var result = OMTransactionUtilities.ReturnTransactionList(dtos);
@@ -70,6 +73,7 @@ public class OMTransactionUtilitiesTests
         Assert.Equal("R2", result[0].ReceivedDetails);
         Assert.Equal("P2", result[0].ProcessedDetails);
         Assert.False(result[0].IsImmediate);
+        Assert.False(result[0].IsFulfilledExternally);
         Assert.Equal("Inactive", result[0].Status);
     }
 }
