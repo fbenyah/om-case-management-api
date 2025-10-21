@@ -16,6 +16,9 @@ public class OMTransactionDto : BaseDtoWithReferenceNumberAndStatus
     public bool IsFulfilledExternally { get; set; } = false;
     public string ExternalSystem { get; set; } = string.Empty;
     public string ExternalSystemId { get; set; } = string.Empty;
+    public string ExternalSystemStatus { get; set; } = string.Empty;
+    public string ExternalSystemParentId { get; set; } = string.Empty;
+    public string ParentReferenceNumber { get; set; } = string.Empty;
     public string ReceivedDetails { get; set; } = string.Empty;
     public string ProcessedDetails { get; set; } = string.Empty;
 }

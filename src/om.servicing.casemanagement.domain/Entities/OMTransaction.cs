@@ -49,6 +49,18 @@ public class OMTransaction : BaseEntityWithReferenceNumberAndStatus
     [Column("external_system_id")]
     public string ExternalSystemId { get; set; } = string.Empty;
 
+    [MaxLength(70)]
+    [Column("external_system_status")]
+    public string ExternalSystemStatus { get; set; } = string.Empty;
+
+    [MaxLength(50)]
+    [Column("external_system_parent_id")]
+    public string ExternalSystemParentId { get; set; } = string.Empty;
+
+    [MaxLength(20)]
+    [Column("parent_reference_number")]
+    public string ParentReferenceNumber { get; set; } = string.Empty;
+
     [Required]
     [Column("received_details", TypeName = "text")]
     public string ReceivedDetails { get; set; }

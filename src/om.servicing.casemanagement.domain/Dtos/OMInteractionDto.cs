@@ -10,6 +10,8 @@
 public class OMInteractionDto : BaseDtoWithReferenceNumberAndStatus
 {
     public string Notes { get; set; } = string.Empty;
+    public bool IsPrimaryInteraction { get; set; } = true;
+    public string PreviousInteractionId { get; set; } = string.Empty;
     public OMCaseDto? Case { get; set; } = null;    
     public List<OMTransactionDto>? Transactions { get; set; } = null;   
 }

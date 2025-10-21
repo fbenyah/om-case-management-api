@@ -19,6 +19,13 @@ public class OMInteraction : BaseEntityWithReferenceNumberAndStatus
 
     [Column("notes", TypeName = "text")]
     public string Notes { get; set; }
-    
-    public ICollection<OMTransaction> Transactions { get; set; }   
+
+    [Required]
+    [Column("is_primary_interaction")]
+    public bool IsPrimaryInteraction { get; set; } = true;
+
+    [Column("previous_interaction_id")]
+    public string PreviousInteractionId { get; set; } = string.Empty;
+
+    public ICollection<OMTransaction> Transactions { get; set; }
 }
