@@ -389,7 +389,7 @@ public class OMCaseService : BaseService, IOMCaseService
             var refExistsResponse = await CaseExistsWithReferenceNumberAsync(omCaseDto.ReferenceNumber, cancellationToken);
             if (!refExistsResponse.Success)
             {
-                throw new InvalidOperationException($"Unable to verify reference number uniqueness: {string.Join("; ", refExistsResponse.ErrorMessages ?? new List<string>())}");
+                throw new InvalidOperationException($"Unable to verify reference number uniqueness for case: {string.Join("; ", refExistsResponse.ErrorMessages ?? new List<string>())}");
             }
 
             if (!refExistsResponse.Data)
@@ -403,7 +403,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
             if (++attempts >= maxAttempts)
             {
-                throw new InvalidOperationException($"Unable to generate a unique reference number after {attempts} attempts.");
+                throw new InvalidOperationException($"Unable to generate a unique case reference number after {attempts} attempts.");
             }
         }
     }
