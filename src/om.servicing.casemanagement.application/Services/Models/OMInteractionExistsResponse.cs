@@ -1,3 +1,3 @@
 ﻿namespace om.servicing.casemanagement.application.Services.Models;
 
-public class OMCaseExistsResponse : BaseItemExistsResponse { }
+public class OMInteractionExistsResponse : BaseItemExistsResponse { }
