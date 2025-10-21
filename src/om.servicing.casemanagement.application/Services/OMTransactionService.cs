@@ -26,7 +26,17 @@ public class OMTransactionService : BaseService, IOMTransactionService
         _transactionRepository = transactionRepository;
     }
 
-    
+    /// <summary>
+    /// Retrieves a list of transactions associated with the specified case ID.
+    /// </summary>
+    /// <remarks>If an error occurs during the retrieval process, the response will include a custom exception
+    /// with details about the failure.</remarks>
+    /// <param name="caseId">The unique identifier of the case for which transactions are to be retrieved. Cannot be null, empty, or
+    /// whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. Optional.</param>
+    /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
+    /// case ID. If no transactions are found, the response will include a custom exception indicating the absence of
+    /// data.</returns>
     public async Task<OMTransactionListResponse> GetTransactionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
@@ -61,7 +71,17 @@ public class OMTransactionService : BaseService, IOMTransactionService
         return response;
     }
 
-    
+    /// <summary>
+    /// Retrieves a list of transactions associated with cases for a given customer identification number.
+    /// </summary>
+    /// <remarks>This method retrieves cases for the specified customer using their identification number and
+    /// then fetches the associated transactions. If an error occurs during the retrieval of cases, the response will
+    /// include a custom exception with details about the failure.</remarks>
+    /// <param name="customerIdentificationNumber">The unique identification number of the customer. This value cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the customer's
+    /// cases. If the <paramref name="customerIdentificationNumber"/> is invalid, the response will include an error
+    /// message.</returns>
     public async Task<OMTransactionListResponse> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
