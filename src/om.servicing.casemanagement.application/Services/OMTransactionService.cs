@@ -152,17 +152,22 @@ public class OMTransactionService : BaseService, IOMTransactionService
             return new List<OMTransactionDto>();
         }
 
-        List<OMInteractionDto>? omInteractionsDto = await _omInteractionService.GetInteractionsForCaseByCustomerIdentificationAsync(customerIdentificationNumber);
-        omInteractionsDto = omInteractionsDto?.Where(i => i.Id == interactionId)?.ToList();
+        OMInteractionListResponse omInteractionListResponse = await _omInteractionService.GetInteractionsForCaseByCustomerIdentificationAsync(customerIdentificationNumber);
+        if (!omInteractionListResponse.Success)
+        {
 
-        if (omInteractionsDto == null || !omInteractionsDto.Any())
+        }
+
+        omInteractionListResponse.Data = omInteractionListResponse.Data?.Where(i => i.Id == interactionId)?.ToList();
+
+        if (omInteractionListResponse.Data == null || !omInteractionListResponse.Data.Any())
         {
             return new List<OMTransactionDto>();
         }
 
         List<OMTransactionDto> allTransactionsDto = new();
 
-        foreach (OMInteractionDto omInteractionDto in omInteractionsDto)
+        foreach (OMInteractionDto omInteractionDto in omInteractionListResponse.Data)
         {
             if (omInteractionDto.Transactions != null && omInteractionDto.Transactions.Any())
             {
@@ -201,17 +206,22 @@ public class OMTransactionService : BaseService, IOMTransactionService
             return new List<OMTransactionDto>();
         }
 
-        List<OMInteractionDto>? omInteractionsDto = await _omInteractionService.GetInteractionsForCaseByCaseReferenceNumberAsync(interactionReferenceNumber);
-        omInteractionsDto = omInteractionsDto?.Where(i => i.Id == interactionId)?.ToList();
+        OMInteractionListResponse omInteractionListResponse = await _omInteractionService.GetInteractionsForCaseByCaseReferenceNumberAsync(interactionReferenceNumber);
+        if (!omInteractionListResponse.Success)
+        {
 
-        if (omInteractionsDto == null || !omInteractionsDto.Any())
+        }
+
+        omInteractionListResponse.Data = omInteractionListResponse.Data?.Where(i => i.Id == interactionId)?.ToList();
+
+        if (omInteractionListResponse.Data == null || !omInteractionListResponse.Data.Any())
         {
             return new List<OMTransactionDto>();
         }
 
         List<OMTransactionDto> allTransactionsDto = new();
 
-        foreach (OMInteractionDto omInteractionDto in omInteractionsDto)
+        foreach (OMInteractionDto omInteractionDto in omInteractionListResponse.Data)
         {
             if (omInteractionDto.Transactions != null && omInteractionDto.Transactions.Any())
             {

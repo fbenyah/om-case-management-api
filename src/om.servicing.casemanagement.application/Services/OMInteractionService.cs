@@ -31,18 +31,40 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// </summary>
     /// <param name="id">The unique identifier of the interaction to retrieve. Cannot be null, empty, or whitespace.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests. Optional.</param>
-    /// <returns>A list of <see cref="OMInteractionDto"/> objects representing the interactions associated with the specified ID.
+    /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the specified ID.
     /// Returns an empty list if the ID is null, empty, or whitespace, or if no interactions are found.</returns>
-    public async Task<List<OMInteractionDto>> GetInteractionsForInteractionIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForInteractionIdAsync(string id, CancellationToken cancellationToken = default)
     {
+        OMInteractionListResponse response = new();
+
         if (string.IsNullOrWhiteSpace(id))
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateErrorMessage("Interaction Id is required.");
+            return response;
         }
 
-        IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.Id == id);
+        try
+        {
+            IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.Id == id);
 
-        return OMInteractionUtilities.ReturnInteractionDtoList(omInteractions);
+            if (omInteractions == null || !omInteractions.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No interactions found for id '{id}'."));
+                return response;
+            }
+
+            response.Data = OMInteractionUtilities.ReturnInteractionDtoList(omInteractions);
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while retrieving interactions with id '{id}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+            return response;
+        }
+        
+        return response;
     }
 
     /// <summary>
@@ -52,18 +74,40 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// case ID and converts them into a list of data transfer objects (<see cref="OMInteractionDto"/>).</remarks>
     /// <param name="caseId">The unique identifier of the case for which interactions are to be retrieved. Cannot be null, empty, or
     /// whitespace.</param>
-    /// <returns>A list of <see cref="OMInteractionDto"/> objects representing the interactions for the specified case. Returns
+    /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions for the specified case. Returns
     /// an empty list if the <paramref name="caseId"/> is null, empty, or whitespace, or if no interactions are found.</returns>
-    public async Task<List<OMInteractionDto>> GetInteractionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default)
     {
+        OMInteractionListResponse response = new();
+
         if (string.IsNullOrWhiteSpace(caseId))
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateErrorMessage("Case Id is required.");
+            return response;
+        }        
+
+        try
+        {
+            IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.CaseId == caseId);
+
+            if (omInteractions == null || !omInteractions.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No interactions found for case id '{caseId}'."));
+                return response;
+            }
+
+            response.Data = OMInteractionUtilities.ReturnInteractionDtoList(omInteractions);
         }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while retrieving interactions with case Id '{caseId}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
 
-        IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.CaseId == caseId);
-
-        return OMInteractionUtilities.ReturnInteractionDtoList(omInteractions);
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+            return response;
+        }
+        
+        return response;
     }
 
     /// <summary>
@@ -74,25 +118,49 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// empty list.</remarks>
     /// <param name="customerIdentificationNumber">The unique identification number of the customer. This value cannot be null, empty, or consist only of
     /// whitespace.</param>
-    /// <returns>A list of <see cref="OMInteractionDto"/> objects representing the interactions associated with the customer's
+    /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the customer's
     /// cases. Returns an empty list if the customer has no cases or if the provided identification number is invalid.</returns>
-    public async Task<List<OMInteractionDto>> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default)
     {
+        OMInteractionListResponse response = new();
+
         if (string.IsNullOrWhiteSpace(customerIdentificationNumber))
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateErrorMessage("Customer identification number is required.");
+            return response;
         }
 
-        OMCaseListResponse omCaseListResponse = await _omCaseService.GetCasesForCustomerByIdentificationNumberAsync(customerIdentificationNumber);
+        OMCaseListResponse omCaseListResponse;
+
+        try
+        {
+            omCaseListResponse = await _omCaseService.GetCasesForCustomerByIdentificationNumberAsync(customerIdentificationNumber);
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while retrieving cases for customer by identification number to get interactions '{customerIdentificationNumber}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+            return response;
+        }
 
         if (!omCaseListResponse.Success)
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
+
+            if (omCaseListResponse.CustomExceptions != null)
+            {
+                response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
+            }
+
+            return response;
         }
 
         if (omCaseListResponse.Data == null || !omCaseListResponse.Data.Any())
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateCustomException(new NotFoundException($"No cases found for customer identification number '{customerIdentificationNumber}'."));
+            return response;
         }
 
         List<OMInteractionDto> allInteractionsDto = new();
@@ -106,14 +174,44 @@ public class OMInteractionService : BaseService, IOMInteractionService
             }
 
             // if Interactions not populated in case, fetch from repo
-            List<OMInteractionDto> interactionsForCase = await GetInteractionsForCaseByCaseIdAsync(omCaseDto.Id);
-            if (interactionsForCase != null && interactionsForCase.Any())
+            OMInteractionListResponse interactionsForCaseResponse;
+
+            try
             {
-                allInteractionsDto.AddRange(interactionsForCase);
+                interactionsForCaseResponse = await GetInteractionsForCaseByCaseIdAsync(omCaseDto.Id);
             }
+            catch (Exception ex)
+            {
+                string errorMessage = $"An error occurred while retrieving interactions for case by case id '{omCaseDto.Id}'. {ex.Message}";
+                _loggingService.LogError(errorMessage, ex);
+
+                response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+                return response;
+            }
+
+            if (!interactionsForCaseResponse.Success)
+            {
+                response.SetOrUpdateErrorMessages(interactionsForCaseResponse.ErrorMessages);
+
+                if (interactionsForCaseResponse.CustomExceptions != null)
+                {
+                    response.SetOrUpdateCustomExceptions(interactionsForCaseResponse.CustomExceptions);
+                }
+
+                return response;
+            }
+
+            if (interactionsForCaseResponse.Data == null || !interactionsForCaseResponse.Data.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No interactions found for case with id '{omCaseDto.Id}'."));
+                return response;
+            }
+
+            allInteractionsDto.AddRange(interactionsForCaseResponse.Data);
         }
 
-        return allInteractionsDto;
+        response.Data = allInteractionsDto;
+        return response;
     }
 
     /// <summary>
@@ -126,26 +224,49 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// <param name="caseReferenceNumber">The unique reference number of the case for which interactions are to be retrieved. Cannot be null, empty, or
     /// whitespace.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests. Defaults to <see cref="CancellationToken.None"/>.</param>
-    /// <returns>A list of <see cref="OMInteractionDto"/> objects representing the interactions associated with the specified
+    /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the specified
     /// case. Returns an empty list if the case reference number is invalid, no cases are found, or no interactions are
     /// associated with the case.</returns>
-    public async Task<List<OMInteractionDto>> GetInteractionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default)
     {
+        OMInteractionListResponse response = new();
+
         if (string.IsNullOrWhiteSpace(caseReferenceNumber))
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateErrorMessage("Case reference number is required.");
+            return response;
         }
 
-        OMCaseListResponse omCaseListResponse = await _omCaseService.GetCasesForCustomerByReferenceNumberAsync(caseReferenceNumber);
+        OMCaseListResponse omCaseListResponse;
+        try
+        {
+            omCaseListResponse = await _omCaseService.GetCasesForCustomerByReferenceNumberAsync(caseReferenceNumber);
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while retrieving cases for customer by case reference number '{caseReferenceNumber}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+            return response;
+        }
 
         if (!omCaseListResponse.Success)
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
+
+            if (omCaseListResponse.CustomExceptions != null)
+            {
+                response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
+            }
+
+            return response;
         }
 
         if (omCaseListResponse.Data == null || !omCaseListResponse.Data.Any())
         {
-            return new List<OMInteractionDto>();
+            response.SetOrUpdateCustomException(new NotFoundException($"No cases found for case reference number '{caseReferenceNumber}'."));
+            return response;
         }
 
         List<OMInteractionDto> allInteractionsDto = new();
@@ -159,14 +280,44 @@ public class OMInteractionService : BaseService, IOMInteractionService
             }
 
             // if Interactions not populated in case, fetch from repo
-            List<OMInteractionDto> interactionsForCase = await GetInteractionsForCaseByCaseIdAsync(omCaseDto.Id);
-            if (interactionsForCase != null && interactionsForCase.Any())
+            OMInteractionListResponse interactionsForCaseResponse;
+
+            try
             {
-                allInteractionsDto.AddRange(interactionsForCase);
+                interactionsForCaseResponse = await GetInteractionsForCaseByCaseIdAsync(omCaseDto.Id);
             }
+            catch (Exception ex)
+            {
+                string errorMessage = $"An error occurred while retrieving interactions for case by case id '{omCaseDto.Id}'. {ex.Message}";
+                _loggingService.LogError(errorMessage, ex);
+
+                response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+                return response;
+            }
+
+            if (!interactionsForCaseResponse.Success)
+            {
+                response.SetOrUpdateErrorMessages(interactionsForCaseResponse.ErrorMessages);
+
+                if (interactionsForCaseResponse.CustomExceptions != null)
+                {
+                    response.SetOrUpdateCustomExceptions(interactionsForCaseResponse.CustomExceptions);
+                }
+
+                return response;
+            }
+
+            if (interactionsForCaseResponse.Data == null || !interactionsForCaseResponse.Data.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No interactions found for case with id '{omCaseDto.Id}'."));
+                return response;
+            }
+
+            allInteractionsDto.AddRange(interactionsForCaseResponse.Data);
         }
 
-        return allInteractionsDto;
+        response.Data = allInteractionsDto;
+        return response;
     }
 
     /// <summary>
