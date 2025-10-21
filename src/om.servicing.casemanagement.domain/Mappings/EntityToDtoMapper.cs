@@ -46,6 +46,8 @@ public static class EntityToDtoMapper
         UpdateDate = entity.UpdateDate,
         Status = entity.Status,
         ReferenceNumber = entity.ReferenceNumber,
+        IsPrimaryInteraction = entity.IsPrimaryInteraction,
+        PreviousInteractionId = entity.PreviousInteractionId,
         Case = entity.Case != null ? ToDto(entity.Case) : null,
         Transactions = entity.Transactions?.Select(t => ToDto(t)).ToList() ?? new List<OMTransactionDto>()
     };
@@ -67,7 +69,10 @@ public static class EntityToDtoMapper
         IsFulfilledExternally = entity.IsFulfilledExternally,
         ExternalSystem = entity.ExternalSystem,
         ExternalSystemId = entity.ExternalSystemId,
+        ExternalSystemStatus = entity.ExternalSystemStatus,
+        ExternalSystemParentId = entity.ExternalSystemParentId,
         ReferenceNumber = entity.ReferenceNumber,
+        ParentReferenceNumber = entity.ParentReferenceNumber,
         ProcessedDetails = entity.ProcessedDetails,
         ReceivedDetails = entity.ReceivedDetails,
         TransactionType = entity.TransactionType != null ? ToDto(entity.TransactionType) : null,
