@@ -3,6 +3,9 @@ using om.servicing.casemanagement.application.Utilities;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
+using om.servicing.casemanagement.domain.Enums;
+using om.servicing.casemanagement.domain.Mappings;
+using om.servicing.casemanagement.domain.Utilities;
 using OM.RequestFramework.Core.Exceptions;
 using OM.RequestFramework.Core.Logging;
 
@@ -242,5 +245,138 @@ public class OMInteractionService : BaseService, IOMInteractionService
             response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
         }
         return response;
+    }
+    
+    /// <summary>
+    /// Creates a new interaction asynchronously based on the provided interaction data.
+    /// </summary>
+    /// <remarks>This method validates the provided interaction data, ensures unique identifiers and reference
+    /// numbers,  and persists the interaction to the repository. If an error occurs during persistence, the response 
+    /// will include a custom exception with detailed error information.</remarks>
+    /// <param name="omInteractionDto">The data transfer object containing the details of the interaction to be created.  This parameter must not be
+    /// <see langword="null"/> and must include valid case data.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>A <see cref="OMInteractionCreateResponse"/> containing the result of the operation, including the  newly created
+    /// interaction's ID, case ID, and reference numbers. If the operation fails, the response  will include error
+    /// details.</returns>
+    public async Task<OMInteractionCreateResponse> CreateInteractionAsync(OMInteractionDto omInteractionDto, CancellationToken cancellationToken = default)
+    {
+        OMInteractionCreateResponse response = new();
+
+        if (omInteractionDto == null)
+        {
+            response.SetOrUpdateErrorMessage("Interaction data is required.");
+            return response;
+        }
+
+        if (omInteractionDto.Case == null)
+        {
+            response.SetOrUpdateErrorMessage("Case data for interaction is required.");
+            return response;
+        }
+
+        CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omInteractionDto.Case!.Channel) ?? CaseChannel.Unknown;
+        // default to CustomerServicing for now
+        OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
+        omInteractionDto.CreatedDate = DateTime.Now;
+        omInteractionDto.Id = UlidUtils.NewUlidString();
+        omInteractionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omInteractionDto.Id, channel, operationalBusinessSegment);
+
+        await EnsureUniqueInteractionIdAndReferenceNumber(omInteractionDto, channel, operationalBusinessSegment, cancellationToken);
+
+        OMInteraction omInteraction = DtoToEntityMapper.ToEntity(omInteractionDto);
+
+        try
+        {
+            await _interactionRepository.AddAsync(omInteraction, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while attempting to create interaction for case '{omInteraction.Case.Id}' with reference '{omInteraction.Case.ReferenceNumber}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new WritePersistenceException(ex, errorMessage));
+            return response;
+        }
+        
+        response.Data.Id = omInteraction.Id;
+        response.Data.CaseId = omInteraction.Case.Id;
+        response.Data.ReferenceNumber = omInteraction.ReferenceNumber;
+        response.Data.CaseReferenceNumber = omInteraction.Case.ReferenceNumber;
+
+        return response;
+    }
+
+    /// <summary>
+    /// Ensures that the specified interaction has a unique interaction ID and reference number.
+    /// </summary>
+    /// <remarks>This method validates the uniqueness of both the interaction ID and reference number. If
+    /// either is found to be non-unique, it regenerates the values and retries the validation process up to a maximum
+    /// number of attempts. If uniqueness cannot be ensured after the maximum attempts, an <see
+    /// cref="InvalidOperationException"/> is thrown.</remarks>
+    /// <param name="omInteractionDto">The interaction data transfer object containing the ID and reference number to validate and potentially
+    /// regenerate.</param>
+    /// <param name="channel">The channel associated with the interaction, used to generate a new reference number if needed.</param>
+    /// <param name="operationalBusinessSegment">The operational business segment associated with the interaction, used to generate a new reference number if
+    /// needed.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException">Thrown if the uniqueness of the interaction ID or reference number cannot be verified due to an unexpected
+    /// state, or if a unique value cannot be generated after the maximum number of attempts.</exception>
+    private async Task EnsureUniqueInteractionIdAndReferenceNumber(OMInteractionDto omInteractionDto, CaseChannel channel, OperationalBusinessSegment operationalBusinessSegment, CancellationToken cancellationToken = default)
+    {
+        const int maxAttempts = 10;
+        int attempts = 0;
+
+        // ensure that there is no existing interaction with the same id
+        while (true)
+        {
+            var idExistsResponse = await InteractionExistsWithIdAsync(omInteractionDto.Id, cancellationToken);
+            if (!idExistsResponse.Success)
+            {
+                // If we cannot determine existence, stop and surface the issue.
+                // We are choosing the throw here because this is an unexpected state that we cannot recover from.
+                throw new InvalidOperationException($"Unable to verify interaction id uniqueness: {string.Join("; ", idExistsResponse.ErrorMessages ?? new List<string>())}");
+            }
+
+            if (!idExistsResponse.Data)
+            {
+                break; // id is unique
+            }
+
+            // regenerate and retry
+            omInteractionDto.Id = UlidUtils.NewUlidString();
+            omInteractionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omInteractionDto.Id, channel, operationalBusinessSegment);
+
+            if (++attempts >= maxAttempts)
+            {
+                throw new InvalidOperationException($"Unable to generate a unique interaction id after {attempts} attempts.");
+            }
+        }
+
+        // ensure that there is no existing interaction with the same reference number
+        attempts = 0;
+        while (true)
+        {
+            var refExistsResponse = await InteractionExistsWithReferenceNumberAsync(omInteractionDto.ReferenceNumber, cancellationToken);
+            if (!refExistsResponse.Success)
+            {
+                throw new InvalidOperationException($"Unable to verify reference number uniqueness for interaction: {string.Join("; ", refExistsResponse.ErrorMessages ?? new List<string>())}");
+            }
+
+            if (!refExistsResponse.Data)
+            {
+                break; // reference number is unique
+            }
+
+            // regenerate and retry
+            omInteractionDto.Id = UlidUtils.NewUlidString();
+            omInteractionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omInteractionDto.Id, channel, operationalBusinessSegment);
+
+            if (++attempts >= maxAttempts)
+            {
+                throw new InvalidOperationException($"Unable to generate a unique interaction reference number after {attempts} attempts.");
+            }
+        }
     }
 }

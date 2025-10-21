@@ -71,4 +71,18 @@ public interface IOMInteractionService
     /// <returns>An <see cref="OMInteractionExistsResponse"/> object containing a boolean value indicating whether the
     /// interaction exists  and any associated error messages or exceptions.</returns>
     Task<OMInteractionExistsResponse> InteractionExistsWithIdAsync(string interactionId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a new interaction asynchronously based on the provided interaction data.
+    /// </summary>
+    /// <remarks>This method validates the provided interaction data, ensures unique identifiers and reference
+    /// numbers,  and persists the interaction to the repository. If an error occurs during persistence, the response 
+    /// will include a custom exception with detailed error information.</remarks>
+    /// <param name="omInteractionDto">The data transfer object containing the details of the interaction to be created.  This parameter must not be
+    /// <see langword="null"/> and must include valid case data.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>A <see cref="OMInteractionCreateResponse"/> containing the result of the operation, including the  newly created
+    /// interaction's ID, case ID, and reference numbers. If the operation fails, the response  will include error
+    /// details.</returns>
+    Task<OMInteractionCreateResponse> CreateInteractionAsync(OMInteractionDto omInteractionDto, CancellationToken cancellationToken = default);
 }
