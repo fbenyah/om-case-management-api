@@ -320,20 +320,58 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns></returns>
     private async Task EnsureUniqueCaseIdAndReferenceNumber(OMCaseDto omCaseDto, CaseChannel channel, OperationalBusinessSegment operationalBusinessSegment, CancellationToken cancellationToken = default)
     {
+        const int maxAttempts = 10;
+        int attempts = 0;
+
         // ensure that there is no existing case with the same id
-        // if there is, generate a new id and keep checking till it is unique
-        while (await CaseExistsWithIdAsync(omCaseDto.Id, cancellationToken))
+        while (true)
         {
+            var idExistsResponse = await CaseExistsWithIdAsync(omCaseDto.Id, cancellationToken);
+            if (!idExistsResponse.Success)
+            {
+                // If we cannot determine existence, stop and surface the issue.
+                // We are choosing the throw here because this is an unexpected state that we cannot recover from.
+                throw new InvalidOperationException($"Unable to verify case id uniqueness: {string.Join("; ", idExistsResponse.ErrorMessages ?? new List<string>())}");
+            }
+
+            if (!idExistsResponse.Data)
+            {
+                break; // id is unique
+            }
+
+            // regenerate and retry
             omCaseDto.Id = UlidUtils.NewUlidString();
             omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
+
+            if (++attempts >= maxAttempts)
+            {
+                throw new InvalidOperationException($"Unable to generate a unique case id after {attempts} attempts.");
+            }
         }
 
         // ensure that there is no existing case with the same reference number
-        // if there is, generate a new reference number and keep checking till it is unique
-        while (await CaseExistsWithReferenceNumberAsync(omCaseDto.ReferenceNumber, cancellationToken))
+        attempts = 0;
+        while (true)
         {
+            var refExistsResponse = await CaseExistsWithReferenceNumberAsync(omCaseDto.ReferenceNumber, cancellationToken);
+            if (!refExistsResponse.Success)
+            {
+                throw new InvalidOperationException($"Unable to verify reference number uniqueness: {string.Join("; ", refExistsResponse.ErrorMessages ?? new List<string>())}");
+            }
+
+            if (!refExistsResponse.Data)
+            {
+                break; // reference number is unique
+            }
+
+            // regenerate and retry
             omCaseDto.Id = UlidUtils.NewUlidString();
             omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
+
+            if (++attempts >= maxAttempts)
+            {
+                throw new InvalidOperationException($"Unable to generate a unique reference number after {attempts} attempts.");
+            }
         }
     }
 }
