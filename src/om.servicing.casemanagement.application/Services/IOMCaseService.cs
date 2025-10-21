@@ -6,6 +6,14 @@ namespace om.servicing.casemanagement.application.Services;
 public interface IOMCaseService
 {
     /// <summary>
+    /// Retrieves a list of cases associated with the specified case ID.
+    /// </summary>
+    /// <param name="caseId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<OMCaseListResponse> GetCasesForCustomerByCaseId(string caseId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Retrieves a list of cases associated with the specified identification number.
     /// </summary>
     /// <remarks>This method queries the case repository to retrieve cases matching the provided

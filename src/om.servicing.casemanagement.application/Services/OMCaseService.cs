@@ -24,6 +24,39 @@ public class OMCaseService : BaseService, IOMCaseService
     }
 
     /// <summary>
+    /// Retrieves a list of cases associated with the specified case ID.
+    /// </summary>
+    /// <param name="caseId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<OMCaseListResponse> GetCasesForCustomerByCaseId(string caseId, CancellationToken cancellationToken = default)
+    {
+        OMCaseListResponse response = new();
+
+        if (string.IsNullOrWhiteSpace(caseId))
+        {
+            response.SetOrUpdateErrorMessage("Case Id is required.");
+            return response;
+        }
+
+        try
+        {
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Id == caseId, cancellationToken);
+            response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while retrieving cases for case id '{caseId}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+            return response;
+        }
+
+        return response;
+    }
+
+    /// <summary>
     /// Retrieves a list of cases associated with the specified identification number.
     /// </summary>
     /// <remarks>This method queries the case repository to retrieve cases matching the provided
