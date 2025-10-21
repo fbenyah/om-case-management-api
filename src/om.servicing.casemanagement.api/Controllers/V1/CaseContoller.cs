@@ -11,7 +11,7 @@ namespace om.servicing.casemanagement.api.Controllers.V1;
 
 [ApiController]
 [Route("/api/casemanagement/v{version:apiVersion}/[controller]")]
-public class CaseContoller : BaseController
+public class CaseController : BaseController
 {
     [SwaggerOperation(
         Summary = "Customer cases by indentification number.",

@@ -10,7 +10,7 @@ using om.servicing.casemanagement.domain.Enums;
 
 namespace om.servicing.casemanagement.tests.Api.Controllers.V1;
 
-public class CaseContollerTests
+public class CaseControllerTests
 {
     [Fact]
     public async Task GetCustomerCasesByIdentification_ReturnsOk_WhenResponseIsSuccessful()
@@ -384,9 +384,9 @@ public class CaseContollerTests
         Assert.Contains("Failed to create case.", returnedResponse.ErrorMessages);
     }
 
-    private CaseContoller CreateControllerWithMediator(Mock<IMediator> mediatorMock)
+    private CaseController CreateControllerWithMediator(Mock<IMediator> mediatorMock)
     {
-        var controller = new CaseContoller();
+        var controller = new CaseController();
 
         // Setup Controller Context with mocked service provider
         var httpContext = new DefaultHttpContext();
