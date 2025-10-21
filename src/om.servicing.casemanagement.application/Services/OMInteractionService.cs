@@ -261,7 +261,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
         }
         catch (Exception ex)
         {
-            string errorMessage = $"An error occurred while checking existence of interaction with reference number '{interactionId}'. {ex.Message}";
+            string errorMessage = $"An error occurred while checking existence of interaction with interaction id '{interactionId}'. {ex.Message}";
             _loggingService.LogError(errorMessage, ex);
 
             response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
@@ -322,9 +322,9 @@ public class OMInteractionService : BaseService, IOMInteractionService
         }
         
         response.Data.Id = omInteraction.Id;
-        response.Data.CaseId = omInteraction.Case.Id;
+        response.Data.CaseId = omInteraction.CaseId;
         response.Data.ReferenceNumber = omInteraction.ReferenceNumber;
-        response.Data.CaseReferenceNumber = omInteraction.Case.ReferenceNumber;
+        response.Data.CaseReferenceNumber = omInteraction.Case?.ReferenceNumber;
 
         return response;
     }
