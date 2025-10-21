@@ -4,12 +4,14 @@ using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
+using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.tests.Application.Services;
 
 public class OMTransactionServiceTests
 {
     private readonly Mock<IOMCaseService> _caseServiceMock;
+    private readonly Mock<ILoggingService> _loggingServiceMock = new();
     private readonly Mock<IOMInteractionService> _interactionServiceMock;
     private readonly Mock<IGenericRepository<OMTransaction>> _transactionRepoMock;
     private readonly OMTransactionService _service;
@@ -19,7 +21,7 @@ public class OMTransactionServiceTests
         _caseServiceMock = new Mock<IOMCaseService>();
         _interactionServiceMock = new Mock<IOMInteractionService>();
         _transactionRepoMock = new Mock<IGenericRepository<OMTransaction>>();
-        _service = new OMTransactionService(_caseServiceMock.Object, _interactionServiceMock.Object, _transactionRepoMock.Object);
+        _service = new OMTransactionService(_caseServiceMock.Object, _loggingServiceMock.Object, _interactionServiceMock.Object, _transactionRepoMock.Object);
     }
 
     [Fact]
