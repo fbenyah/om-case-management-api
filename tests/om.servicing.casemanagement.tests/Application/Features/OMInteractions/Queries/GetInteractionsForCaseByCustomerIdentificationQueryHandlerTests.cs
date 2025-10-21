@@ -1,7 +1,9 @@
 ﻿using Moq;
 using om.servicing.casemanagement.application.Features.OMInteractions.Queries;
 using om.servicing.casemanagement.application.Services;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Dtos;
+using OM.RequestFramework.Core.Exceptions;
 using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.tests.Application.Features.OMInteractions.Queries;
@@ -34,43 +36,74 @@ public class GetInteractionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("Customer Identification Number is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync(It.IsAny<string>(), CancellationToken.None), Times.Never);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_ReturnsInteractions_WhenCustomerIdentificationNumberIsValid()
+    public async Task Handle_ReturnsInteractions_WhenServiceReturnsSuccess()
     {
-        var interactions = new List<OMInteractionDto>
-    {
-        new OMInteractionDto { Notes = "Interaction1", Status = "Active" }
-    };
+        var serviceResponse = new OMInteractionListResponse
+        {
+            Data = new List<OMInteractionDto>
+            {
+                new OMInteractionDto { Notes = "Interaction1", Status = "Active" }
+            }
+        };
 
         _interactionServiceMock
             .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None))
-            .ReturnsAsync(interactions);
+            .ReturnsAsync(serviceResponse);
 
         var query = new GetInteractionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "cust123" };
         var result = await _handler.Handle(query, CancellationToken.None);
 
         Assert.NotNull(result);
+        Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
-        Assert.Equal(interactions, result.Data);
+        Assert.Equal(serviceResponse.Data, result.Data);
         _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_ReturnsEmptyList_WhenNoInteractionsFound()
+    public async Task Handle_PropagatesErrorsAndCustomExceptions_WhenServiceReturnsFailure()
     {
-        _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust456", CancellationToken.None))
-            .ReturnsAsync(new List<OMInteractionDto>());
+        var serviceResponse = new OMInteractionListResponse();
+        serviceResponse.SetOrUpdateErrorMessages(new List<string> { "case svc error" });
+        serviceResponse.SetOrUpdateCustomExceptions(new List<ICustomException> { new ClientException("custom-ex") });
 
-        var query = new GetInteractionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "cust456" };
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("custErr", CancellationToken.None))
+            .ReturnsAsync(serviceResponse);
+
+        var query = new GetInteractionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "custErr" };
         var result = await _handler.Handle(query, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Empty(result.ErrorMessages ?? new List<string>());
+        Assert.False(result.Success);
+        Assert.Contains("case svc error", result.ErrorMessages);
+        Assert.NotNull(result.CustomExceptions);
+        Assert.Contains(result.CustomExceptions, ex => ex is ClientException);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("custErr", CancellationToken.None), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsEmptyData_WhenServiceSucceedsWithNoInteractions()
+    {
+        var serviceResponse = new OMInteractionListResponse
+        {
+            Data = new List<OMInteractionDto>()
+        };
+
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("custEmpty", CancellationToken.None))
+            .ReturnsAsync(serviceResponse);
+
+        var query = new GetInteractionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "custEmpty" };
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.True(result.Success);
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("cust456", CancellationToken.None), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCustomerIdentificationAsync("custEmpty", CancellationToken.None), Times.Once);
     }
 }

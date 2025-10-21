@@ -1,7 +1,9 @@
 ﻿using Moq;
 using om.servicing.casemanagement.application.Features.OMInteractions.Queries;
 using om.servicing.casemanagement.application.Services;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Dtos;
+using OM.RequestFramework.Core.Exceptions;
 using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.tests.Application.Features.OMInteractions.Queries;
@@ -38,39 +40,71 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ReturnsInteractions_WhenCaseIdIsValid()
+    public async Task Handle_ReturnsInteractions_WhenServiceReturnsSuccess()
     {
-        var interactions = new List<OMInteractionDto>
+        var serviceResponse = new OMInteractionListResponse
         {
-            new OMInteractionDto { Notes = "Interaction1", Status = "Active" }
+            Data = new List<OMInteractionDto>
+            {
+                new OMInteractionDto { Notes = "Interaction1", Status = "Active" }
+            }
         };
 
         _interactionServiceMock
             .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case123", CancellationToken.None))
-            .ReturnsAsync(interactions);
+            .ReturnsAsync(serviceResponse);
 
         var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "case123" };
         var result = await _handler.Handle(query, CancellationToken.None);
 
         Assert.NotNull(result);
+        Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
-        Assert.Equal(interactions, result.Data);
+        Assert.Equal(serviceResponse.Data, result.Data);
         _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case123", CancellationToken.None), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_ReturnsEmptyList_WhenNoInteractionsFound()
+    public async Task Handle_PropagatesErrorsAndCustomExceptions_WhenServiceReturnsFailure()
     {
-        _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case456", CancellationToken.None))
-            .ReturnsAsync(new List<OMInteractionDto>());
+        var serviceResponse = new OMInteractionListResponse();
+        serviceResponse.SetOrUpdateErrorMessages(new List<string> { "repo error", "other error" });
+        serviceResponse.SetOrUpdateCustomExceptions(new List<ICustomException> { new ClientException("custom-ex") });
 
-        var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "case456" };
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("caseErr", CancellationToken.None))
+            .ReturnsAsync(serviceResponse);
+
+        var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "caseErr" };
         var result = await _handler.Handle(query, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Empty(result.ErrorMessages ?? new List<string>());
+        Assert.False(result.Success);
+        Assert.Contains("repo error", result.ErrorMessages);
+        Assert.Contains("other error", result.ErrorMessages);
+        Assert.NotNull(result.CustomExceptions);
+        Assert.Contains(result.CustomExceptions, ex => ex is ClientException);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("caseErr", CancellationToken.None), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ReturnsEmptyData_WhenServiceSucceedsWithNoInteractions()
+    {
+        var serviceResponse = new OMInteractionListResponse
+        {
+            Data = new List<OMInteractionDto>()
+        };
+
+        _interactionServiceMock
+            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("caseEmpty", CancellationToken.None))
+            .ReturnsAsync(serviceResponse);
+
+        var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "caseEmpty" };
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.True(result.Success);
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case456", CancellationToken.None), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("caseEmpty", CancellationToken.None), Times.Once);
     }
 }
