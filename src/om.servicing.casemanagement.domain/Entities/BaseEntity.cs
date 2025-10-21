@@ -51,3 +51,33 @@ public abstract class BaseEntityWithReferenceNumberAndStatus : BaseEntityWithSta
     [Column("reference_number")]
     public string ReferenceNumber { get; set; }
 }
+
+/// <summary>
+/// Represents an entity that includes information about an external system,  such as its identifier, status, and parent
+/// relationships, in addition to  reference number and status details inherited from the base class.
+/// </summary>
+/// <remarks>This class is designed to be used as a base class for entities that need to  track relationships and
+/// statuses with external systems. It provides properties  for storing external system identifiers, statuses, and
+/// parent-child relationships.</remarks>
+public abstract class BaseEntityWithExternalSystemAndReferenceNumberAndStatus : BaseEntityWithReferenceNumberAndStatus
+{
+    [MaxLength(50)]
+    [Column("external_system")]
+    public string ExternalSystem { get; set; } = string.Empty;
+
+    [MaxLength(50)]
+    [Column("external_system_id")]
+    public string ExternalSystemId { get; set; } = string.Empty;
+
+    [MaxLength(70)]
+    [Column("external_system_status")]
+    public string ExternalSystemStatus { get; set; } = string.Empty;
+
+    [MaxLength(50)]
+    [Column("external_system_parent_id")]
+    public string ExternalSystemParentId { get; set; } = string.Empty;
+
+    [MaxLength(20)]
+    [Column("parent_reference_number")]
+    public string ParentReferenceNumber { get; set; } = string.Empty;
+}
