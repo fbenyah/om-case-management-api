@@ -10,7 +10,7 @@ namespace om.servicing.casemanagement.domain.Entities;
 /// as cases, interactions, and transaction types. It also includes details about whether the transaction is immediate
 /// and information about its received and processed states.</remarks>
 [Table("transaction")]
-public class OMTransaction : BaseEntityWithReferenceNumberAndStatus
+public class OMTransaction : BaseEntityWithExternalSystemAndReferenceNumberAndStatus
 {
     [ForeignKey("case")]
     [MaxLength(50)]
@@ -39,27 +39,7 @@ public class OMTransaction : BaseEntityWithReferenceNumberAndStatus
 
     [Required]
     [Column("is_fulfilled_externally")]
-    public bool IsFulfilledExternally { get; set; } = false;
-
-    [MaxLength(50)]
-    [Column("external_system")]
-    public string ExternalSystem { get; set; } = string.Empty;
-
-    [MaxLength(50)]
-    [Column("external_system_id")]
-    public string ExternalSystemId { get; set; } = string.Empty;
-
-    [MaxLength(70)]
-    [Column("external_system_status")]
-    public string ExternalSystemStatus { get; set; } = string.Empty;
-
-    [MaxLength(50)]
-    [Column("external_system_parent_id")]
-    public string ExternalSystemParentId { get; set; } = string.Empty;
-
-    [MaxLength(20)]
-    [Column("parent_reference_number")]
-    public string ParentReferenceNumber { get; set; } = string.Empty;
+    public bool IsFulfilledExternally { get; set; } = false;    
 
     [Required]
     [Column("received_details", TypeName = "text")]
