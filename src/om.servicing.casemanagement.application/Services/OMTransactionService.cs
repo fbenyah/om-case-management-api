@@ -3,6 +3,9 @@ using om.servicing.casemanagement.application.Utilities;
 using om.servicing.casemanagement.data.Repositories.Shared;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
+using om.servicing.casemanagement.domain.Enums;
+using om.servicing.casemanagement.domain.Mappings;
+using om.servicing.casemanagement.domain.Utilities;
 using OM.RequestFramework.Core.Exceptions;
 using OM.RequestFramework.Core.Logging;
 
@@ -235,6 +238,219 @@ public class OMTransactionService : BaseService, IOMTransactionService
 
         await GetListOfTransactions(interactionId, omInteractionListResponse, interactionReferenceNumber, response);
         return response;
+    }
+
+    /// <summary>
+    /// Checks whether a transaction with the specified reference number exists in the system.
+    /// </summary>
+    /// <remarks>If the <paramref name="referenceNumber"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an error occurs during the operation, the response will include a
+    /// custom exception with details about the failure.</remarks>
+    /// <param name="referenceNumber">The reference number of the transaction to check. This value cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
+    /// <returns>An <see cref="OMTransactionExistsResponse"/> object containing a boolean value indicating whether the
+    /// transaction exists and any associated error messages or exceptions.</returns>
+    public async Task<OMTransactionExistsResponse> TransactionExistsWithReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default)
+    {
+        OMTransactionExistsResponse response = new();
+
+        if (string.IsNullOrWhiteSpace(referenceNumber))
+        {
+            response.SetOrUpdateErrorMessage("Reference number is required.");
+            return response;
+        }
+
+        try
+        {
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
+            if (omOMTransactions != null && omOMTransactions?.Count() > 0)
+            {
+                response.Data = true;
+                return response;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of transaction with reference number '{referenceNumber}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+        }
+        return response;
+    }
+
+    /// <summary>
+    /// Asynchronously checks whether a transaction with the specified ID exists in the system.
+    /// </summary>
+    /// <remarks>If the <paramref name="transactionId"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an exception occurs during the operation, the response will include a
+    /// custom exception with details about the error.</remarks>
+    /// <param name="transactionId">The unique identifier of the transaction to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>An <see cref="OMTransactionExistsResponse"/> object containing a boolean value indicating whether the
+    /// transaction exists and any associated error messages or exceptions.</returns>
+    public async Task<OMTransactionExistsResponse> TransactionExistsWithIdAsync(string transactionId, CancellationToken cancellationToken = default)
+    {
+        OMTransactionExistsResponse response = new();
+
+        if (string.IsNullOrWhiteSpace(transactionId))
+        {
+            response.SetOrUpdateErrorMessage("Transaction Id is required.");
+            return response;
+        }
+
+        try
+        {
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.Id == transactionId, cancellationToken);
+            if (omOMTransactions != null && omOMTransactions?.Count() > 0)
+            {
+                response.Data = true;
+                return response;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of transaction with transaction id '{transactionId}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+        }
+        return response;
+    }
+
+    /// <summary>
+    /// Creates a new transaction asynchronously based on the provided transaction data.
+    /// </summary>
+    /// <remarks>This method validates the provided transaction data and ensures that the transaction ID and
+    /// reference number are unique. If the transaction data or associated case data is missing, an error message is set
+    /// in the response. In case of a persistence error, a custom exception is logged and included in the
+    /// response.</remarks>
+    /// <param name="omTransactionDto">The transaction data transfer object containing the details of the transaction to be created. Cannot be <see
+    /// langword="null"/>.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. Optional.</param>
+    /// <returns>A <see cref="OMTransactionCreateResponse"/> containing the result of the transaction creation,  including the
+    /// generated transaction ID, reference numbers, and any error messages if the operation fails.</returns>
+    public async Task<OMTransactionCreateResponse> CreateTransactionAsync(OMTransactionDto omTransactionDto, CancellationToken cancellationToken = default)
+    {
+        OMTransactionCreateResponse response = new();
+
+        if (omTransactionDto == null)
+        {
+            response.SetOrUpdateErrorMessage("Transaction data is required.");
+            return response;
+        }
+
+        if (omTransactionDto.Case == null)
+        {
+            response.SetOrUpdateErrorMessage("Case data for transaction is required.");
+            return response;
+        }
+
+        CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omTransactionDto.Case!.Channel) ?? CaseChannel.Unknown;
+        // default to CustomerServicing for now
+        OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
+        omTransactionDto.CreatedDate = DateTime.Now;
+        omTransactionDto.Id = UlidUtils.NewUlidString();
+        omTransactionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omTransactionDto.Id, channel, operationalBusinessSegment);
+
+        await EnsureUniqueTransactionIdAndReferenceNumber(omTransactionDto, channel, operationalBusinessSegment, cancellationToken);
+
+        OMTransaction omTransaction = DtoToEntityMapper.ToEntity(omTransactionDto);
+
+        try
+        {
+            await _transactionRepository.AddAsync(omTransaction, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while attempting to create transaction for case '{omTransaction.Case.Id}' with reference '{omTransaction.Case.ReferenceNumber}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new WritePersistenceException(ex, errorMessage));
+            return response;
+        }
+
+        response.Data.Id = omTransaction.Id;
+        response.Data.CaseId = omTransaction.CaseId;
+        response.Data.InteractionId = omTransaction.InteractionId;
+        response.Data.ReferenceNumber = omTransaction.ReferenceNumber;
+        response.Data.CaseReferenceNumber = omTransaction.Case?.ReferenceNumber;
+        response.Data.InteractionReferenceNumber = omTransaction.Interaction?.ReferenceNumber;
+
+        return response;
+    }
+
+    /// <summary>
+    /// Ensures that the specified transaction has a unique transaction ID and reference number.
+    /// </summary>
+    /// <remarks>This method validates the uniqueness of both the transaction ID and reference number. If
+    /// either is found to be non-unique, it regenerates the values and retries the validation process up to a maximum
+    /// number of attempts. If uniqueness cannot be ensured after the maximum attempts, an <see
+    /// cref="InvalidOperationException"/> is thrown.</remarks>
+    /// <param name="omTransactionDto">The transaction data transfer object containing the transaction ID and reference number to validate and
+    /// potentially regenerate.</param>
+    /// <param name="channel">The channel associated with the transaction, used in generating a new reference number if needed.</param>
+    /// <param name="operationalBusinessSegment">The operational business segment associated with the transaction, used in generating a new reference number if
+    /// needed.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException">Thrown if the uniqueness of the transaction ID or reference number cannot be verified due to an unexpected
+    /// state, or if a unique value cannot be generated after the maximum number of attempts.</exception>
+    private async Task EnsureUniqueTransactionIdAndReferenceNumber(OMTransactionDto omTransactionDto, CaseChannel channel, OperationalBusinessSegment operationalBusinessSegment, CancellationToken cancellationToken = default)
+    {
+        const int maxAttempts = 10;
+        int attempts = 0;
+
+        // ensure that there is no existing interaction with the same id
+        while (true)
+        {
+            var idExistsResponse = await TransactionExistsWithIdAsync(omTransactionDto.Id, cancellationToken);
+            if (!idExistsResponse.Success)
+            {
+                // If we cannot determine existence, stop and surface the issue.
+                // We are choosing the throw here because this is an unexpected state that we cannot recover from.
+                throw new InvalidOperationException($"Unable to verify transaction id uniqueness: {string.Join("; ", idExistsResponse.ErrorMessages ?? new List<string>())}");
+            }
+
+            if (!idExistsResponse.Data)
+            {
+                break; // id is unique
+            }
+
+            // regenerate and retry
+            omTransactionDto.Id = UlidUtils.NewUlidString();
+            omTransactionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omTransactionDto.Id, channel, operationalBusinessSegment);
+
+            if (++attempts >= maxAttempts)
+            {
+                throw new InvalidOperationException($"Unable to generate a unique transaction id after {attempts} attempts.");
+            }
+        }
+
+        // ensure that there is no existing transaction with the same reference number
+        attempts = 0;
+        while (true)
+        {
+            var refExistsResponse = await TransactionExistsWithReferenceNumberAsync(omTransactionDto.ReferenceNumber, cancellationToken);
+            if (!refExistsResponse.Success)
+            {
+                throw new InvalidOperationException($"Unable to verify reference number uniqueness for transaction: {string.Join("; ", refExistsResponse.ErrorMessages ?? new List<string>())}");
+            }
+
+            if (!refExistsResponse.Data)
+            {
+                break; // reference number is unique
+            }
+
+            // regenerate and retry
+            omTransactionDto.Id = UlidUtils.NewUlidString();
+            omTransactionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omTransactionDto.Id, channel, operationalBusinessSegment);
+
+            if (++attempts >= maxAttempts)
+            {
+                throw new InvalidOperationException($"Unable to generate a unique transaction reference number after {attempts} attempts.");
+            }
+        }
     }
 
     /// <summary>
