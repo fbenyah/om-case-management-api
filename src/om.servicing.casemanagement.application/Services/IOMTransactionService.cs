@@ -1,4 +1,5 @@
-﻿using om.servicing.casemanagement.domain.Dtos;
+﻿using om.servicing.casemanagement.application.Services.Models;
+using om.servicing.casemanagement.domain.Dtos;
 
 namespace om.servicing.casemanagement.application.Services;
 
@@ -11,7 +12,7 @@ public interface IOMTransactionService
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see
     /// cref="OMTransactionDto"/> objects  representing the transactions for the specified case. Returns an empty list
     /// if no transactions are found.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific case, filtered by the customer's identification
@@ -22,7 +23,7 @@ public interface IOMTransactionService
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of  <see
     /// cref="OMTransactionDto"/> objects representing the transactions for the specified customer. If no transactions
     /// are found, the list will be empty.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific case, identified by its reference number.
@@ -36,7 +37,7 @@ public interface IOMTransactionService
     /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions associated with the specified
     /// case. Returns an empty list if the case reference number is invalid, no cases are found, or no transactions are
     /// associated with the case.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific interaction and customer identification number.
@@ -50,7 +51,7 @@ public interface IOMTransactionService
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see
     /// cref="OMTransactionDto"/> objects representing the transactions associated with the specified customer and
     /// interaction. If no transactions are found, the list will be empty.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific interaction, identified by its reference number and
@@ -64,5 +65,5 @@ public interface IOMTransactionService
     /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns>A list of <see cref="OMTransactionDto"/> objects representing the transactions associated with the specified
     /// interaction. Returns an empty list if no transactions are found or if the input parameters are invalid.</returns>
-    Task<List<OMTransactionDto>> GetTransactionsForInteractionByReferenceNumberAsync(string interactionReferenceNumber, string interactionId, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForInteractionByReferenceNumberAsync(string interactionReferenceNumber, string interactionId, CancellationToken cancellationToken = default);
 }
