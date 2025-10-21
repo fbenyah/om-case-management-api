@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Responses.Shared;
 using OM.RequestFramework.Core.Exceptions;
 
@@ -66,8 +67,24 @@ public class GetTransactionsForCaseByCaseIdQueryHandler : SharedFeatures, IReque
             return response;
         }
 
-        List<domain.Dtos.OMTransactionDto> transactions = await _transactionService.GetTransactionsForCaseByCaseIdAsync(request.CaseId, cancellationToken);
-        response.Data = transactions;
+        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForCaseByCaseIdAsync(request.CaseId, cancellationToken);
+
+        if (!omTransactionListResponse.Success)
+        {
+            if (omTransactionListResponse.ErrorMessages != null && omTransactionListResponse.ErrorMessages.Any())
+            {
+                response.SetOrUpdateErrorMessages(omTransactionListResponse.ErrorMessages);
+            }
+
+            if (omTransactionListResponse.CustomExceptions != null && omTransactionListResponse.CustomExceptions.Any())
+            {
+                response.SetOrUpdateCustomExceptions(omTransactionListResponse.CustomExceptions);
+            }
+
+            return response;
+        }
+
+        response.Data = omTransactionListResponse.Data;
 
         return response;
     }

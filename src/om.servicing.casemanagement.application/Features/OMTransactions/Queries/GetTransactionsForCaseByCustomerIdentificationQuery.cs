@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Responses.Shared;
 using OM.RequestFramework.Core.Exceptions;
 
@@ -61,8 +62,24 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandler : Shared
             return response;
         }
 
-        var transactions = await _transactionService.GetTransactionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, cancellationToken);
-        response.Data = transactions;
+        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, cancellationToken);
+
+        if (!omTransactionListResponse.Success)
+        {
+            if (omTransactionListResponse.ErrorMessages != null && omTransactionListResponse.ErrorMessages.Any())
+            {
+                response.SetOrUpdateErrorMessages(omTransactionListResponse.ErrorMessages);
+            }
+
+            if (omTransactionListResponse.CustomExceptions != null && omTransactionListResponse.CustomExceptions.Any())
+            {
+                response.SetOrUpdateCustomExceptions(omTransactionListResponse.CustomExceptions);
+            }
+
+            return response;
+        }
+
+        response.Data = omTransactionListResponse.Data;
 
         return response;
     }
