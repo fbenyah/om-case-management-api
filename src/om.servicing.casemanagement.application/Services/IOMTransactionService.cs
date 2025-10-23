@@ -8,6 +8,19 @@ namespace om.servicing.casemanagement.application.Services;
 public interface IOMTransactionService
 {
     /// <summary>
+    /// Retrieves a list of transactions associated with the specified transaction ID.
+    /// </summary>
+    /// <remarks>This method queries the underlying data store to retrieve transactions associated with the
+    /// given  <paramref name="transactionId"/>. If the <paramref name="transactionId"/> is invalid or no transactions 
+    /// are found, the response will include an appropriate error message or exception.</remarks>
+    /// <param name="transactionId">The unique identifier of the transaction for which associated transactions are to be retrieved.  This parameter
+    /// cannot be null, empty, or consist only of whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of associated transactions if found,  or an error
+    /// message if no transactions are found or an error occurs during retrieval.</returns>
+    Task<OMTransactionListResponse> GetTransactionsForTransactionByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Retrieves a list of transactions associated with the specified case ID.
     /// </summary>
     /// <remarks>If an error occurs during the retrieval process, the response will include a custom exception

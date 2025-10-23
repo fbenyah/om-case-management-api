@@ -1,6 +1,9 @@
-﻿using om.servicing.casemanagement.domain.Dtos;
+﻿using om.servicing.casemanagement.application.Services.Models;
+using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Entities;
+using om.servicing.casemanagement.domain.Exceptions.Client;
 using om.servicing.casemanagement.domain.Mappings;
+using om.servicing.casemanagement.domain.Responses.Shared;
 
 namespace om.servicing.casemanagement.application.Utilities;
 
@@ -52,5 +55,57 @@ public static class OMInteractionUtilities
         }
 
         return interactionList;
+    }
+
+    /// <summary>
+    /// Determines whether the specified interaction is eligible for creating another entity by validating the
+    /// interaction data and updating the response with any errors or exceptions.
+    /// </summary>
+    /// <remarks>This method performs the following validations: <list type="bullet"> <item> If the retrieval
+    /// of interactions is unsuccessful, the response is updated with the error messages and any custom exceptions
+    /// returned by the service. </item> <item> If no interactions are found for the specified interaction ID, the
+    /// response is updated with an error message indicating that no interaction was found. </item> <item> If multiple
+    /// interactions are found for the specified interaction ID, the response is updated with an error message and a
+    /// <see cref="ConflictException"/> is added to indicate the conflict. </item> </list></remarks>
+    /// <typeparam name="TResponse">The type of the response object, which must inherit from <see cref="BaseFluentValidationError"/>.</typeparam>
+    /// <param name="interactionId">The unique identifier of the interaction to validate.</param>
+    /// <param name="omInteractionListResponse">An object that will be populated with the result of retrieving interactions for the specified interaction ID.</param>
+    /// <param name="response">The response object to update with error messages or exceptions if the interaction is not eligible.</param>
+    /// <param name="interactionService">The service used to retrieve interaction data for the specified interaction ID.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns></returns>
+    public async static Task DetermineIfInteractionIsEligibleForOtherEntityCreation<TResponse>(string interactionId, OMInteractionListResponse omInteractionListResponse, TResponse response, Services.IOMInteractionService interactionService, CancellationToken cancellationToken)
+        where TResponse : BaseFluentValidationError
+    {
+        omInteractionListResponse = await interactionService.GetInteractionsForInteractionIdAsync(interactionId, cancellationToken);
+
+        if (!omInteractionListResponse.Success)
+        {
+
+            response.SetOrUpdateErrorMessages(omInteractionListResponse.ErrorMessages);
+
+            if (omInteractionListResponse.CustomExceptions != null && omInteractionListResponse.CustomExceptions.Any())
+            {
+                response.SetOrUpdateCustomExceptions(omInteractionListResponse.CustomExceptions);
+            }
+        }
+
+        if (omInteractionListResponse.Data == null || omInteractionListResponse.Data.Count == 0)
+        {
+            response.SetOrUpdateErrorMessage($"No interaction found for Interaction Id: {interactionId}");
+            response.SetOrUpdateErrorMessages(omInteractionListResponse.ErrorMessages);
+
+            if (omInteractionListResponse.CustomExceptions != null && omInteractionListResponse.CustomExceptions.Any())
+            {
+                response.SetOrUpdateCustomExceptions(omInteractionListResponse.CustomExceptions);
+            }
+        }
+
+        if (omInteractionListResponse.Data.Count > 1)
+        {
+            string errorMessage = $"Multiple interactions found for Interaction Id: {interactionId}";
+            response.SetOrUpdateErrorMessage(errorMessage);
+            response.SetOrUpdateCustomException(new ConflictException(errorMessage));
+        }
     }
 }

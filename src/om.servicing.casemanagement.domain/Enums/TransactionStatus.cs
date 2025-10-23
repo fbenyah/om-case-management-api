@@ -20,5 +20,8 @@ public enum TransactionStatus
     Cancelled,
 
     [Description("Closed")]
-    Closed
+    Closed,
+
+    [Description("Received")]
+    Received
 }

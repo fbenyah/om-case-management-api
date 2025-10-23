@@ -36,14 +36,16 @@ public class CreateOMCaseCommandHandler : SharedFeatures, IRequestHandler<Create
         _caseService = caseService;
     }
 
-    public async Task<CreateOMCaseCommandResponse> Handle(CreateOMCaseCommand request, CancellationToken cancellationToken)
+    public async Task<CreateOMCaseCommandResponse> Handle(CreateOMCaseCommand command, CancellationToken cancellationToken)
     {
         var response = new CreateOMCaseCommandResponse();
 
+        //TO:DO add validations for command
+
         OMCaseDto omCaseDto = new()
         {
-            Channel = request.SourceChannel.GetDescription(),
-            IdentificationNumber = request.IdentificationNumber,
+            Channel = command.SourceChannel.GetDescription(),
+            IdentificationNumber = command.IdentificationNumber,
             Status = CaseStatus.Initiated.GetDescription()
         };
 

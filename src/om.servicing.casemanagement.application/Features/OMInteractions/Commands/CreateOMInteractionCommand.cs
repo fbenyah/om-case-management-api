@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using om.servicing.casemanagement.application.Services.Models;
+using om.servicing.casemanagement.application.Utilities;
 using om.servicing.casemanagement.domain.Dtos;
 using om.servicing.casemanagement.domain.Enums;
-using om.servicing.casemanagement.domain.Exceptions.Client;
 using om.servicing.casemanagement.domain.Responses.Shared;
 using OM.RequestFramework.Core.Extensions;
 using OM.RequestFramework.Core.Logging;
@@ -15,7 +15,6 @@ public class CreateOMInteractionCommand : IRequest<CreateOMInteractionCommandRes
     public string Notes { get; set; } = string.Empty;
     public bool IsPrimaryInteraction { get; set; } = true;
     public string PreviousInteractionId { get; set; } = string.Empty;
-    public CaseChannel SourceSystem { get; set; } = CaseChannel.Unknown;
 }
 
 public class CreateOMInteractionCommandResponse : ApplicationBaseResponse<BasicInteractionCreateResponse>
@@ -43,51 +42,25 @@ public class CreateOMInteractionCommandHandler : SharedFeatures, IRequestHandler
         _interactionService = interactionService;
     }
 
-    public async Task<CreateOMInteractionCommandResponse> Handle(CreateOMInteractionCommand request, CancellationToken cancellationToken)
+    public async Task<CreateOMInteractionCommandResponse> Handle(CreateOMInteractionCommand command, CancellationToken cancellationToken)
     {
         var response = new CreateOMInteractionCommandResponse();
 
-        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByCaseId(request.CaseId, cancellationToken);
-        
-        if (!omCaseListResponse.Success)
+        //TO:DO add validations for command
+
+        OMCaseListResponse omCaseListResponse = new();
+        await OMCaseUtilities.DetermineIfCaseIsEligibleForOtherEntityCreation<CreateOMInteractionCommandResponse>(command.CaseId, omCaseListResponse, response, _caseService, cancellationToken);
+
+        if (!response.Success)
         {
-
-            response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
-
-            if (omCaseListResponse.CustomExceptions != null && omCaseListResponse.CustomExceptions.Any())
-            {
-                response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
-            }
-
-            return response;
-        }
-
-        if (omCaseListResponse.Data == null || omCaseListResponse.Data.Count == 0)
-        {
-            response.SetOrUpdateErrorMessage($"No case found for CaseId: {request.CaseId}");
-            response.SetOrUpdateErrorMessages(omCaseListResponse.ErrorMessages);
-
-            if (omCaseListResponse.CustomExceptions != null && omCaseListResponse.CustomExceptions.Any())
-            {
-                response.SetOrUpdateCustomExceptions(omCaseListResponse.CustomExceptions);
-            }
-
-            return response;
-        }
-
-        if (omCaseListResponse.Data.Count > 1)
-        {
-            string errorMessage = $"Multiple cases found for CaseId: {request.CaseId}";
-            response.SetOrUpdateErrorMessage(errorMessage);
-            response.SetOrUpdateCustomException(new ConflictException(errorMessage));
             return response;
         }
 
         OMInteractionDto omInteractionDto = new()
         {
-            Notes = request.Notes,
-            IsPrimaryInteraction = request.IsPrimaryInteraction,
-            PreviousInteractionId = request.PreviousInteractionId,            
+            Notes = command.Notes,
+            IsPrimaryInteraction = command.IsPrimaryInteraction,
+            PreviousInteractionId = command.PreviousInteractionId,            
             Case = omCaseListResponse.Data.First(),
             Status = InteractionStatus.Initiated.GetDescription()
         };
