@@ -10,10 +10,8 @@ public class OMTransactionCreateResponse : ServiceBaseResponse<BasicTransactionC
     }
 }
 
-public class BasicTransactionCreateResponse
+public class BasicTransactionCreateResponse : BaseCreateItemResponse
 {
-    public string Id { get; set; } = string.Empty;
-    public string ReferenceNumber { get; set; } = string.Empty;
     public string InteractionId { get; set; } = string.Empty;
     public string InteractionReferenceNumber { get; set; } = string.Empty;
     public string CaseId { get; set; } = string.Empty;
