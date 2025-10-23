@@ -10,8 +10,6 @@ public class OMCaseCreateResponse : ServiceBaseResponse<BasicCaseCreateResponse>
     }
 }
 
-public class BasicCaseCreateResponse
-{
-    public string Id { get; set; } = string.Empty;
-    public string ReferenceNumber { get; set; } = string.Empty;
+public class BasicCaseCreateResponse : BaseCreateItemResponse
+{    
 }
