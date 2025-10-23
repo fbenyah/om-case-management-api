@@ -16,7 +16,6 @@ public class CreateOMTransactionCommand : IRequest<CreateOMTransactionCommandRes
     public bool IsImmediate { get; set; } = true;
     public bool IsFulfilledExternally { get; set; } = false;
     public string ReceivedDetails { get; set; } = string.Empty;
-    public string ProcessedDetails { get; set; } = string.Empty;
 }
 
 public class CreateOMTransactionCommandResponse : ApplicationBaseResponse<BasicTransactionCreateResponse>
