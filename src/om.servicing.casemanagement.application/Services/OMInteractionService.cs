@@ -297,7 +297,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
             return response;
         }
 
-        CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omInteractionDto.Case!.Channel) ?? CaseChannel.Unknown;
+        CaseChannel channel = EnumUtils.ParseDescriptionAsEnum<CaseChannel>(omInteractionDto.Case!.Channel);
         // default to CustomerServicing for now
         OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
         omInteractionDto.CreatedDate = DateTime.UtcNow;

@@ -391,7 +391,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
             return response;
         }
 
-        CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omTransactionDto.Case!.Channel) ?? CaseChannel.Unknown;
+        CaseChannel channel = EnumUtils.ParseDescriptionAsEnum<CaseChannel>(omTransactionDto.Case!.Channel);
         // default to CustomerServicing for now
         OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
         omTransactionDto.CreatedDate = DateTime.UtcNow;
