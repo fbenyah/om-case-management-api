@@ -26,7 +26,6 @@ public class TransactionController : BaseController
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CreateOMTransaction(
         [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
-        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XCustomerId)] string customerIdentificationNumber,
         [FromBody] CreateOMTransactionCommand command)
     {
         CreateOMTransactionCommandResponse response = await Mediator.Send(command);

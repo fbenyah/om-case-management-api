@@ -26,7 +26,6 @@ public class InteractionController : BaseController
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CreateOMInteraction(
         [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
-        [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XCustomerId)] string customerIdentificationNumber,
         [FromBody] CreateOMInteractionCommand command)
     {
         CreateOMInteractionCommandResponse response = await Mediator.Send(command);
