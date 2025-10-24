@@ -394,7 +394,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
         CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omTransactionDto.Case!.Channel) ?? CaseChannel.Unknown;
         // default to CustomerServicing for now
         OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
-        omTransactionDto.CreatedDate = DateTime.Now;
+        omTransactionDto.CreatedDate = DateTime.UtcNow;
         omTransactionDto.Id = UlidUtils.NewUlidString();
         omTransactionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omTransactionDto.Id, channel, operationalBusinessSegment);
 

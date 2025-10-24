@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using om.servicing.casemanagement.application.Services.Models;
+using om.servicing.casemanagement.domain.Enums;
 using om.servicing.casemanagement.domain.Responses.Shared;
 using OM.RequestFramework.Core.Exceptions;
+using OM.RequestFramework.Core.Extensions;
 using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.application.Features.OMCases.Queries;
@@ -14,7 +16,7 @@ namespace om.servicing.casemanagement.application.Features.OMCases.Queries;
 /// cref="GetCustomerCasesByIdentificationNumberAndStatusResponse"/>.</remarks>
 public class GetCustomerCasesByIdentificationNumberAndStatusQuery : IRequest<GetCustomerCasesByIdentificationNumberAndStatusResponse>
 {
-    public string Status { get; set; } = string.Empty;
+    public CaseStatus Status { get; set; } = CaseStatus.Unknown;
     public string IdentificationNumber { get; set; } = string.Empty;
 }
 
@@ -73,13 +75,13 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandler : Share
             return response;
         }
 
-        if (string.IsNullOrWhiteSpace(request.Status))
+        if (string.IsNullOrWhiteSpace(request.Status.GetDescription()))
         {
             response.SetOrUpdateErrorMessage("Status of case(s) is required.");
             return response;
         }
 
-        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAndStatusAsync(request.IdentificationNumber, request.Status, cancellationToken);
+        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAndStatusAsync(request.IdentificationNumber, request.Status.GetDescription(), cancellationToken);
         
         if (!omCaseListResponse.Success)
         {            

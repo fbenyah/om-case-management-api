@@ -155,7 +155,7 @@ public class CaseControllerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.IMIConnect, "123", "Open");
+        var result = await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.IMIConnect, "123", CaseStatus.Open);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -178,7 +178,7 @@ public class CaseControllerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.AdviserWorkBench, "123", "Open");
+        var result = await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.AdviserWorkBench, "123", CaseStatus.Open);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -199,11 +199,11 @@ public class CaseControllerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.AgentWorkBench, "ABC123", "Closed");
+        await controller.GetCustomerCasesByIdentificationAndStatus(CaseChannel.AgentWorkBench, "ABC123", CaseStatus.Closed);
 
         // Assert
         mediatorMock.Verify(m => m.Send(
-            It.Is<GetCustomerCasesByIdentificationNumberAndStatusQuery>(q => q.IdentificationNumber == "ABC123" && q.Status == "Closed"),
+            It.Is<GetCustomerCasesByIdentificationNumberAndStatusQuery>(q => q.IdentificationNumber == "ABC123" && q.Status == CaseStatus.Closed),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -220,7 +220,7 @@ public class CaseControllerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByReferenceAndStatus(CaseChannel.IMIConnect, "123", "Open");
+        var result = await controller.GetCustomerCasesByReferenceAndStatus(CaseChannel.IMIConnect, "123", CaseStatus.Open);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -243,7 +243,7 @@ public class CaseControllerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        var result = await controller.GetCustomerCasesByReferenceAndStatus(CaseChannel.AdviserWorkBench, "123", "Open");
+        var result = await controller.GetCustomerCasesByReferenceAndStatus(CaseChannel.AdviserWorkBench, "123", CaseStatus.Open);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -264,11 +264,11 @@ public class CaseControllerTests
         var controller = CreateControllerWithMediator(mediatorMock);
 
         // Act
-        await controller.GetCustomerCasesByReferenceAndStatus(CaseChannel.AgentWorkBench, "ABC123", "Closed");
+        await controller.GetCustomerCasesByReferenceAndStatus(CaseChannel.AgentWorkBench, "ABC123", CaseStatus.Closed);
 
         // Assert
         mediatorMock.Verify(m => m.Send(
-            It.Is<GetCustomerCasesByReferenceNumberAndStatusQuery>(q => q.ReferenceNumber == "ABC123" && q.Status == "Closed"),
+            It.Is<GetCustomerCasesByReferenceNumberAndStatusQuery>(q => q.ReferenceNumber == "ABC123" && q.Status == CaseStatus.Closed),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

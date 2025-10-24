@@ -76,7 +76,7 @@ public class CaseController : BaseController
     public async Task<IActionResult> GetCustomerCasesByIdentificationAndStatus(
         [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
         string identificationNumber,
-        string status)
+        CaseStatus status)
     {
         GetCustomerCasesByIdentificationNumberAndStatusResponse response = await Mediator.Send(new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
@@ -102,7 +102,7 @@ public class CaseController : BaseController
     public async Task<IActionResult> GetCustomerCasesByReferenceAndStatus(
         [Required, FromHeader(Name = CaseManagementConstants.HttpHeaders.XSourceSystem)] CaseChannel sourceSystem,
         string referenceNumber,
-        string status)
+        CaseStatus status)
     {
         GetCustomerCasesByReferenceNumberAndStatusResponse response = await Mediator.Send(new GetCustomerCasesByReferenceNumberAndStatusQuery
         {

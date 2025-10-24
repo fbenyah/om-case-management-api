@@ -11,7 +11,7 @@ namespace om.servicing.casemanagement.domain.Responses.Shared;
 /// <typeparam name="T">The type of the data contained in the response.</typeparam>
 public abstract class ServiceBaseResponse<T> : BaseFluentValidationError
 {
-    public DateTime ResponseTime { get; private set; } = DateTime.Now;
+    public DateTime ResponseTime { get; private set; } = DateTime.UtcNow;
 
     [JsonPropertyName("data")]
     public T Data { get; set; }

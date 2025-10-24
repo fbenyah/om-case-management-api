@@ -266,10 +266,10 @@ public class OMCaseService : BaseService, IOMCaseService
             return response;
         }
                 
-        CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omCaseDto.Channel) ?? CaseChannel.Unknown;
+        CaseChannel channel = EnumUtils.ParseDescriptionAsEnum<CaseChannel>(omCaseDto.Channel);
         // default to CustomerServicing for now
         OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
-        omCaseDto.CreatedDate = DateTime.Now;        
+        omCaseDto.CreatedDate = DateTime.UtcNow;        
         omCaseDto.Id = UlidUtils.NewUlidString();
         omCaseDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omCaseDto.Id, channel, operationalBusinessSegment);
 
@@ -283,9 +283,10 @@ public class OMCaseService : BaseService, IOMCaseService
         }
         catch (Exception ex)
         {
-            string errorMessage = $"An error occurred while attempting to create case '{omCaseDto.IdentificationNumber}'. {ex.Message}";
+            string errorMessage = $"An error occurred while attempting to create case '{omCaseDto.IdentificationNumber}'. {ex.Message} {ex.InnerException?.Message}";
             _loggingService.LogError(errorMessage, ex);
 
+            response.SetOrUpdateErrorMessage(errorMessage);
             response.SetOrUpdateCustomException(new WritePersistenceException(ex, errorMessage));
             return response;
         }

@@ -3,6 +3,7 @@ using om.servicing.casemanagement.application.Features.OMCases.Queries;
 using om.servicing.casemanagement.application.Services;
 using om.servicing.casemanagement.application.Services.Models;
 using om.servicing.casemanagement.domain.Dtos;
+using om.servicing.casemanagement.domain.Enums;
 using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.tests.Application.Features.OMCases.Queries;
@@ -32,7 +33,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
             IdentificationNumber = identificationNumber,
-            Status = "Open"
+            Status = CaseStatus.Open
         };
 
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -53,7 +54,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
             IdentificationNumber = "123456",
-            Status = status
+            Status = CaseStatus.Initiated
         };
 
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -83,7 +84,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
             IdentificationNumber = "123456",
-            Status = "Open"
+            Status = CaseStatus.Open
         };
 
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -111,7 +112,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
             IdentificationNumber = "123456",
-            Status = "Open"
+            Status = CaseStatus.Open
         };
 
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -138,7 +139,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
         {
             IdentificationNumber = "123456",
-            Status = "Closed"
+            Status = CaseStatus.Closed
         };
 
         var result = await _handler.Handle(query, CancellationToken.None);

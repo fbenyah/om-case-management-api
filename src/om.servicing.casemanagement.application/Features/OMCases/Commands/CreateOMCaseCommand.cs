@@ -49,7 +49,7 @@ public class CreateOMCaseCommandHandler : SharedFeatures, IRequestHandler<Create
             Status = CaseStatus.Initiated.GetDescription()
         };
 
-        OMCaseCreateResponse createCaseserviceResponse = await _caseService.CreateCaseAsync(new OMCaseDto(), cancellationToken);
+        OMCaseCreateResponse createCaseserviceResponse = await _caseService.CreateCaseAsync(omCaseDto, cancellationToken);
         if (!createCaseserviceResponse.Success)
         {
             response.SetOrUpdateErrorMessage("Failed to create shell case.");

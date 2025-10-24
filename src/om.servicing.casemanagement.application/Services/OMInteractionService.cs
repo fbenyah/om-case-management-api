@@ -300,7 +300,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
         CaseChannel channel = EnumUtils.GetEnumValueFromName<CaseChannel>(omInteractionDto.Case!.Channel) ?? CaseChannel.Unknown;
         // default to CustomerServicing for now
         OperationalBusinessSegment operationalBusinessSegment = OperationalBusinessSegment.CustomerServicing;
-        omInteractionDto.CreatedDate = DateTime.Now;
+        omInteractionDto.CreatedDate = DateTime.UtcNow;
         omInteractionDto.Id = UlidUtils.NewUlidString();
         omInteractionDto.ReferenceNumber = ReferenceNumberGenerator.GenerateReferenceNumber(omInteractionDto.Id, channel, operationalBusinessSegment);
 
