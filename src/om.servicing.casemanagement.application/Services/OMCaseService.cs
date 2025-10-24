@@ -42,7 +42,13 @@ public class OMCaseService : BaseService, IOMCaseService
         try
         {
             IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Id == caseId, cancellationToken);
-            response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
+            List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
+
+            if (!caseListDto.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No cases found for case id '{caseId}'."));
+            }
+            response.Data = caseListDto;
         }
         catch (Exception ex)
         {
@@ -81,7 +87,13 @@ public class OMCaseService : BaseService, IOMCaseService
         try
         {
             IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.IdentificationNumber == identificationNumber, cancellationToken);
-            response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
+            List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
+
+            if (!caseListDto.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No cases found for case identification number '{identificationNumber}'."));
+            }
+            response.Data = caseListDto;
         }
         catch (Exception ex)
         {
@@ -121,7 +133,13 @@ public class OMCaseService : BaseService, IOMCaseService
         try
         {
             IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.IdentificationNumber == identityNumber, cancellationToken);
-            response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
+            List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
+
+            if (!caseListDto.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No cases found for case identification number '{identityNumber}' and status '{status}'."));
+            }
+            response.Data = caseListDto;
         }
         catch (Exception ex)
         {
@@ -160,7 +178,13 @@ public class OMCaseService : BaseService, IOMCaseService
         try
         {
             IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
-            response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
+            List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
+
+            if (!caseListDto.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No cases found for case reference number '{referenceNumber}'."));
+            }
+            response.Data = caseListDto;
         }
         catch (Exception ex)
         {
@@ -201,7 +225,13 @@ public class OMCaseService : BaseService, IOMCaseService
         try
         {
             IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.ReferenceNumber == referenceNumber, cancellationToken);
-            response.Data = OMCaseUtilities.ReturnCaseDtoList(omCases);
+            List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
+
+            if (!caseListDto.Any())
+            {
+                response.SetOrUpdateCustomException(new NotFoundException($"No cases found for case reference number '{referenceNumber}' and status '{status}'."));
+            }
+            response.Data = caseListDto;
         }
         catch (Exception ex)
         {
