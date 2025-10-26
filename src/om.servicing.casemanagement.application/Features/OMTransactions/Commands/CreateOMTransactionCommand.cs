@@ -50,10 +50,9 @@ public class CreateOMTransactionCommandHandler : SharedFeatures, IRequestHandler
 
         //TO:DO add validations for command
 
-        OMCaseListResponse omCaseListResponse = new();
-        await OMCaseUtilities.DetermineIfCaseIsEligibleForOtherEntityCreation<CreateOMTransactionCommandResponse>(command.CaseId, omCaseListResponse, response, _caseService, cancellationToken);
+        OMCaseListResponse omCaseListResponse = await OMCaseUtilities.DetermineIfCaseIsEligibleForOtherEntityCreation<CreateOMTransactionCommandResponse>(command.CaseId, response, _caseService, cancellationToken);
         
-        if (!response.Success)
+        if (!response.Success || !omCaseListResponse.Success)
         {
             return response;
         }
@@ -61,10 +60,9 @@ public class CreateOMTransactionCommandHandler : SharedFeatures, IRequestHandler
         OMInteractionListResponse? oMInteractionListResponse = null;
         if (!string.IsNullOrWhiteSpace(command.InteractionId))
         {
-            oMInteractionListResponse = new();
-            await OMInteractionUtilities.DetermineIfInteractionIsEligibleForOtherEntityCreation<CreateOMTransactionCommandResponse>(command.InteractionId, oMInteractionListResponse, response, _interactionService, cancellationToken);
+            oMInteractionListResponse = await OMInteractionUtilities.DetermineIfInteractionIsEligibleForOtherEntityCreation<CreateOMTransactionCommandResponse>(command.InteractionId, response, _interactionService, cancellationToken);
 
-            if (!response.Success)
+            if (!response.Success || !oMInteractionListResponse.Success)
             {
                 return response;
             }

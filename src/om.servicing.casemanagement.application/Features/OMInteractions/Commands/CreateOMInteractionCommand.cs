@@ -48,13 +48,34 @@ public class CreateOMInteractionCommandHandler : SharedFeatures, IRequestHandler
 
         //TO:DO add validations for command
 
-        OMCaseListResponse omCaseListResponse = new();
-        await OMCaseUtilities.DetermineIfCaseIsEligibleForOtherEntityCreation<CreateOMInteractionCommandResponse>(command.CaseId, omCaseListResponse, response, _caseService, cancellationToken);
+        OMCaseListResponse omCaseListResponse = await OMCaseUtilities.DetermineIfCaseIsEligibleForOtherEntityCreation<CreateOMInteractionCommandResponse>(command.CaseId, response, _caseService, cancellationToken);
 
-        if (!response.Success)
+        if (!response.Success || !omCaseListResponse.Success)
         {
             return response;
         }
+
+        // if not primary interaction, validate previous interaction exists
+        if (!command.IsPrimaryInteraction)
+        {
+            OMInteractionExistsResponse omInteractionExistsResponse = await _interactionService.InteractionOnCaseExistsWithIdAsync(command.PreviousInteractionId, command.CaseId, cancellationToken);
+            if (!omInteractionExistsResponse.Success)
+            {
+                response.SetOrUpdateErrorMessages(omInteractionExistsResponse.ErrorMessages);
+
+                if (omInteractionExistsResponse.CustomExceptions != null && omInteractionExistsResponse.CustomExceptions.Any())
+                {
+                    response.SetOrUpdateCustomExceptions(omInteractionExistsResponse.CustomExceptions);
+                }
+
+                return response;
+            }
+        }
+
+        // TO:DO ensure the previous interaction belongs to the same case
+        // if it does belong to the same case, close the loop by updating the previous interaction status to Closed
+        // This can be done in the interaction service layer
+        // For now, we will just create the new interaction
 
         OMInteractionDto omInteractionDto = new()
         {
