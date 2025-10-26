@@ -61,6 +61,19 @@ public interface IOMInteractionService
     Task<OMInteractionExistsResponse> InteractionExistsWithReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Asynchronously determines whether an interaction exists with the specified reference number.
+    /// </summary>
+    /// <remarks>If an error occurs during the operation, the response will include details about the
+    /// exception encountered.</remarks>
+    /// <param name="referenceNumber">The reference number to search for. This value cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an <see
+    /// cref="OMInteractionExistsResponse"/> object  indicating whether an interaction with the specified reference
+    /// number exists. If the reference number is invalid, the response  will include an error message.</returns>
+    Task<OMInteractionExistsResponse> InteractionOnCaseExistsWithReferenceNumberAsync(string referenceNumber, string caseId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Determines whether an interaction with the specified identifier exists in the repository.
     /// </summary>
     /// <remarks>If the <paramref name="interactionId"/> is null, empty, or consists only of whitespace, the
@@ -71,6 +84,19 @@ public interface IOMInteractionService
     /// <returns>An <see cref="OMInteractionExistsResponse"/> object containing a boolean value indicating whether the
     /// interaction exists  and any associated error messages or exceptions.</returns>
     Task<OMInteractionExistsResponse> InteractionExistsWithIdAsync(string interactionId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Determines whether an interaction with the specified identifier exists in the repository.
+    /// </summary>
+    /// <remarks>If the <paramref name="interactionId"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an error occurs during the repository query, the response will
+    /// include a custom exception with details about the failure.</remarks>
+    /// <param name="interactionId">The unique identifier of the interaction to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>An <see cref="OMInteractionExistsResponse"/> object containing a boolean value indicating whether the
+    /// interaction exists  and any associated error messages or exceptions.</returns>
+    Task<OMInteractionExistsResponse> InteractionOnCaseExistsWithIdAsync(string interactionId, string caseId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new interaction asynchronously based on the provided interaction data.

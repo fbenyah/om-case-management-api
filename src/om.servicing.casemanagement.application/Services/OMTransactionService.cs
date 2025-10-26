@@ -325,6 +325,52 @@ public class OMTransactionService : BaseService, IOMTransactionService
     }
 
     /// <summary>
+    /// Checks whether a transaction with the specified reference number exists in the system.
+    /// </summary>
+    /// <remarks>If the <paramref name="referenceNumber"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an error occurs during the operation, the response will include a
+    /// custom exception with details about the failure.</remarks>
+    /// <param name="referenceNumber">The reference number of the transaction to check. This value cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
+    /// <returns>An <see cref="OMTransactionExistsResponse"/> object containing a boolean value indicating whether the
+    /// transaction exists and any associated error messages or exceptions.</returns>
+    public async Task<OMTransactionExistsResponse> TransactionOnCaseExistsWithReferenceNumberAsync(string referenceNumber, string caseId, CancellationToken cancellationToken = default)
+    {
+        OMTransactionExistsResponse response = new();
+
+        if (string.IsNullOrWhiteSpace(referenceNumber))
+        {
+            response.SetOrUpdateErrorMessage("Reference number is required.");
+            return response;
+        }
+
+        if (string.IsNullOrWhiteSpace(caseId))
+        {
+            response.SetOrUpdateErrorMessage("Case Id is required.");
+            return response;
+        }
+
+        try
+        {
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber && c.CaseId == caseId, cancellationToken);
+            if (omOMTransactions != null && omOMTransactions?.Count() > 0)
+            {
+                response.Data = true;
+                return response;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of transaction with reference number '{referenceNumber}' on case with id {caseId}. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+        }
+        return response;
+    }
+
+    /// <summary>
     /// Asynchronously checks whether a transaction with the specified ID exists in the system.
     /// </summary>
     /// <remarks>If the <paramref name="transactionId"/> is null, empty, or consists only of whitespace, the
@@ -356,6 +402,52 @@ public class OMTransactionService : BaseService, IOMTransactionService
         catch (Exception ex)
         {
             string errorMessage = $"An error occurred while checking existence of transaction with transaction id '{transactionId}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+        }
+        return response;
+    }
+
+    /// <summary>
+    /// Asynchronously checks whether a transaction with the specified ID exists in the system.
+    /// </summary>
+    /// <remarks>If the <paramref name="transactionId"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an exception occurs during the operation, the response will include a
+    /// custom exception with details about the error.</remarks>
+    /// <param name="transactionId">The unique identifier of the transaction to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>An <see cref="OMTransactionExistsResponse"/> object containing a boolean value indicating whether the
+    /// transaction exists and any associated error messages or exceptions.</returns>
+    public async Task<OMTransactionExistsResponse> TransactionOnCaseExistsWithIdAsync(string transactionId, string caseId, CancellationToken cancellationToken = default)
+    {
+        OMTransactionExistsResponse response = new();
+
+        if (string.IsNullOrWhiteSpace(transactionId))
+        {
+            response.SetOrUpdateErrorMessage("Transaction Id is required.");
+            return response;
+        }
+
+        if (string.IsNullOrWhiteSpace(caseId))
+        {
+            response.SetOrUpdateErrorMessage("Case Id is required.");
+            return response;
+        }
+
+        try
+        {
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.Id == transactionId && c.CaseId == caseId, cancellationToken);
+            if (omOMTransactions != null && omOMTransactions?.Count() > 0)
+            {
+                response.Data = true;
+                return response;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of transaction with transaction id '{transactionId}' on case with case id {caseId}. {ex.Message}";
             _loggingService.LogError(errorMessage, ex);
 
             response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
@@ -402,6 +494,10 @@ public class OMTransactionService : BaseService, IOMTransactionService
 
         OMTransaction omTransaction = DtoToEntityMapper.ToEntity(omTransactionDto);
 
+        // prepare entity for persistence (ensure FKs set, clear navigations) and preserve values for response
+        var (preservedCaseReferenceNumber, preservedCaseId, preservedInteractionReferenceNumber, preservedInteractionId, preservedTransactionTypeId) =
+            OMTransactionUtilities.PrepareTransactionForPersistence(omTransaction);
+
         try
         {
             await _transactionRepository.AddAsync(omTransaction, cancellationToken);
@@ -419,8 +515,10 @@ public class OMTransactionService : BaseService, IOMTransactionService
         response.Data.CaseId = omTransaction.CaseId;
         response.Data.InteractionId = omTransaction.InteractionId;
         response.Data.ReferenceNumber = omTransaction.ReferenceNumber;
-        response.Data.CaseReferenceNumber = omTransaction.Case?.ReferenceNumber;
-        response.Data.InteractionReferenceNumber = omTransaction.Interaction?.ReferenceNumber;
+
+        // use preserved reference values because navigation properties were cleared before save
+        response.Data.CaseReferenceNumber = preservedCaseReferenceNumber;
+        response.Data.InteractionReferenceNumber = preservedInteractionReferenceNumber;
 
         return response;
     }

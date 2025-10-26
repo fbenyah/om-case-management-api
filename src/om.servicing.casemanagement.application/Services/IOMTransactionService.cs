@@ -102,6 +102,19 @@ public interface IOMTransactionService
     Task<OMTransactionExistsResponse> TransactionExistsWithReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Checks whether a transaction with the specified reference number exists in the system.
+    /// </summary>
+    /// <remarks>If the <paramref name="referenceNumber"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an error occurs during the operation, the response will include a
+    /// custom exception with details about the failure.</remarks>
+    /// <param name="referenceNumber">The reference number of the transaction to check. This value cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
+    /// <returns>An <see cref="OMTransactionExistsResponse"/> object containing a boolean value indicating whether the
+    /// transaction exists and any associated error messages or exceptions.</returns>
+    Task<OMTransactionExistsResponse> TransactionOnCaseExistsWithReferenceNumberAsync(string referenceNumber, string caseId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Asynchronously checks whether a transaction with the specified ID exists in the system.
     /// </summary>
     /// <remarks>If the <paramref name="transactionId"/> is null, empty, or consists only of whitespace, the
@@ -112,6 +125,19 @@ public interface IOMTransactionService
     /// <returns>An <see cref="OMTransactionExistsResponse"/> object containing a boolean value indicating whether the
     /// transaction exists and any associated error messages or exceptions.</returns>
     Task<OMTransactionExistsResponse> TransactionExistsWithIdAsync(string transactionId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Asynchronously checks whether a transaction with the specified ID exists in the system.
+    /// </summary>
+    /// <remarks>If the <paramref name="transactionId"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an exception occurs during the operation, the response will include a
+    /// custom exception with details about the error.</remarks>
+    /// <param name="transactionId">The unique identifier of the transaction to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>An <see cref="OMTransactionExistsResponse"/> object containing a boolean value indicating whether the
+    /// transaction exists and any associated error messages or exceptions.</returns>
+    Task<OMTransactionExistsResponse> TransactionOnCaseExistsWithIdAsync(string transactionId, string caseId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new transaction asynchronously based on the provided transaction data.

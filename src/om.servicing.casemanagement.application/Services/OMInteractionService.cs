@@ -231,6 +231,52 @@ public class OMInteractionService : BaseService, IOMInteractionService
     }
 
     /// <summary>
+    /// Asynchronously determines whether an interaction exists with the specified reference number.
+    /// </summary>
+    /// <remarks>If an error occurs during the operation, the response will include details about the
+    /// exception encountered.</remarks>
+    /// <param name="referenceNumber">The reference number to search for. This value cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an <see
+    /// cref="OMInteractionExistsResponse"/> object  indicating whether an interaction with the specified reference
+    /// number exists. If the reference number is invalid, the response  will include an error message.</returns>
+    public async Task<OMInteractionExistsResponse> InteractionOnCaseExistsWithReferenceNumberAsync(string referenceNumber, string caseId, CancellationToken cancellationToken = default)
+    {
+        OMInteractionExistsResponse response = new();
+
+        if (string.IsNullOrWhiteSpace(referenceNumber))
+        {
+            response.SetOrUpdateErrorMessage("Reference number is required.");
+            return response;
+        }
+
+        if (string.IsNullOrWhiteSpace(caseId))
+        {
+            response.SetOrUpdateErrorMessage("Case Id is required.");
+            return response;
+        }
+
+        try
+        {
+            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber && c.CaseId == caseId, cancellationToken);
+            if (omInteractions != null && omInteractions?.Count() > 0)
+            {
+                response.Data = true;
+                return response;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of interaction with reference number '{referenceNumber}' on case with id '{caseId}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+        }
+        return response;
+    }
+
+    /// <summary>
     /// Determines whether an interaction with the specified identifier exists in the repository.
     /// </summary>
     /// <remarks>If the <paramref name="interactionId"/> is null, empty, or consists only of whitespace, the
@@ -268,7 +314,53 @@ public class OMInteractionService : BaseService, IOMInteractionService
         }
         return response;
     }
-    
+
+    /// <summary>
+    /// Determines whether an interaction with the specified identifier exists in the repository.
+    /// </summary>
+    /// <remarks>If the <paramref name="interactionId"/> is null, empty, or consists only of whitespace, the
+    /// response will include an error message. If an error occurs during the repository query, the response will
+    /// include a custom exception with details about the failure.</remarks>
+    /// <param name="interactionId">The unique identifier of the interaction to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="caseId">The unique identifier of the case to check. Cannot be null, empty, or whitespace.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>An <see cref="OMInteractionExistsResponse"/> object containing a boolean value indicating whether the
+    /// interaction exists  and any associated error messages or exceptions.</returns>
+    public async Task<OMInteractionExistsResponse> InteractionOnCaseExistsWithIdAsync(string interactionId, string caseId, CancellationToken cancellationToken = default)
+    {
+        OMInteractionExistsResponse response = new();
+
+        if (string.IsNullOrWhiteSpace(interactionId))
+        {
+            response.SetOrUpdateErrorMessage("Interaction Id is required.");
+            return response;
+        }
+
+        if (string.IsNullOrWhiteSpace(caseId))
+        {
+            response.SetOrUpdateErrorMessage("Case Id is required.");
+            return response;
+        }
+
+        try
+        {
+            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.Id == interactionId && c.CaseId == caseId, cancellationToken);
+            if (omInteractions != null && omInteractions?.Count() > 0)
+            {
+                response.Data = true;
+                return response;
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"An error occurred while checking existence of interaction with interaction id '{interactionId}' on case with id '{caseId}'. {ex.Message}";
+            _loggingService.LogError(errorMessage, ex);
+
+            response.SetOrUpdateCustomException(new ReadPersistenceException(ex, errorMessage));
+        }
+        return response;
+    }
+
     /// <summary>
     /// Creates a new interaction asynchronously based on the provided interaction data.
     /// </summary>
@@ -308,6 +400,9 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         OMInteraction omInteraction = DtoToEntityMapper.ToEntity(omInteractionDto);
 
+        // prepare entity for persistence (ensure FK set, clear navigation) and preserve case values for response
+        var (preservedCaseReferenceNumber, preservedCaseId) = OMInteractionUtilities.PrepareInteractionForPersistence(omInteraction);
+
         try
         {
             await _interactionRepository.AddAsync(omInteraction, cancellationToken);
@@ -324,7 +419,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
         response.Data.Id = omInteraction.Id;
         response.Data.CaseId = omInteraction.CaseId;
         response.Data.ReferenceNumber = omInteraction.ReferenceNumber;
-        response.Data.CaseReferenceNumber = omInteraction.Case?.ReferenceNumber;
+        response.Data.CaseReferenceNumber = preservedCaseReferenceNumber;
 
         return response;
     }
