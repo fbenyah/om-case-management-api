@@ -277,6 +277,9 @@ public class OMCaseService : BaseService, IOMCaseService
 
         OMCase omCase = DtoToEntityMapper.ToEntity(omCaseDto);
 
+        // prepare nested children to avoid EF duplicate-tracking
+        var (preservedCaseReferenceNumber, preservedCaseId) = OMCaseUtilities.PrepareCaseForPersistence(omCase);
+
         try
         {
             await _caseRepository.AddAsync(omCase, cancellationToken);

@@ -111,4 +111,74 @@ public static class OMCaseUtilities
 
         return omCaseListResponse;
     }
+
+    /// <summary>
+    /// Prepare an OMCase entity for persistence by ensuring nested FK properties are set and clearing navigation properties
+    /// that would cause EF Core to attempt to attach duplicate tracked entities (for example when child interactions or transactions
+    /// contain their own navigation references). Returns preserved values you may need after save (case id/reference).
+    /// </summary>
+    public static (string? PreservedCaseReferenceNumber, string? PreservedCaseId) PrepareCaseForPersistence(OMCase omCase)
+    {
+        if (omCase == null) throw new ArgumentNullException(nameof(omCase));
+
+        string? preservedCaseReferenceNumber = omCase.ReferenceNumber;
+        string? preservedCaseId = omCase.Id;
+
+        // If interactions exist, ensure their FK back-reference to the case is set (prefer the parent's Id if present),
+        // clear their Case navigation and ensure nested transactions are prepared similarly.
+        if (omCase.Interactions != null)
+        {
+            foreach (var interaction in omCase.Interactions)
+            {
+                if (!string.IsNullOrWhiteSpace(omCase.Id))
+                {
+                    interaction.CaseId = omCase.Id;
+                }
+                else if (!string.IsNullOrWhiteSpace(interaction.Case?.Id))
+                {
+                    interaction.CaseId = interaction.Case.Id;
+                }
+
+                // For each transaction on the interaction, set FKs from navigation if present and clear navigations
+                if (interaction.Transactions != null)
+                {
+                    foreach (var tx in interaction.Transactions)
+                    {
+                        if (!string.IsNullOrWhiteSpace(omCase.Id))
+                        {
+                            tx.CaseId = omCase.Id;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(tx.Case?.Id))
+                        {
+                            tx.CaseId = tx.Case.Id;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(interaction.Id))
+                        {
+                            tx.InteractionId = interaction.Id;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(tx.Interaction?.Id))
+                        {
+                            tx.InteractionId = tx.Interaction.Id;
+                        }
+
+                        if (tx.TransactionType != null && !string.IsNullOrWhiteSpace(tx.TransactionType.Id))
+                        {
+                            tx.TransactionTypeId = tx.TransactionType.Id;
+                        }
+
+                        // Clear child navigations so EF won't try to attach duplicates
+                        tx.Case = null;
+                        tx.Interaction = null;
+                        tx.TransactionType = null;
+                    }
+                }
+
+                // Clear back-reference to case on interaction to avoid EF duplicate tracking
+                interaction.Case = null;
+            }
+        }
+
+        return (preservedCaseReferenceNumber, preservedCaseId);
+    }
 }
