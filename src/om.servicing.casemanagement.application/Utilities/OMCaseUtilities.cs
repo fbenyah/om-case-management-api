@@ -69,17 +69,16 @@ public static class OMCaseUtilities
     /// object with relevant error messages or exceptions based on the outcome of the checks.</remarks>
     /// <typeparam name="TResponse">The type of the response object, which must inherit from <see cref="BaseFluentValidationError"/>.</typeparam>
     /// <param name="caseId">The unique identifier of the case to evaluate. Cannot be null or empty.</param>
-    /// <param name="omCaseListResponse">An object containing the response data for the case list. This will be updated with the result of the case
     /// retrieval operation.</param>
     /// <param name="response">The response object to update with error messages or exceptions if the case is not eligible for further entity
     /// creation.</param>
     /// <param name="caseService">The service used to retrieve case information based on the provided case ID.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests. This allows the operation to be canceled if needed.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async static Task DetermineIfCaseIsEligibleForOtherEntityCreation<TResponse>(string caseId, OMCaseListResponse omCaseListResponse, TResponse response, Services.IOMCaseService caseService, CancellationToken cancellationToken)
+    public async static Task<OMCaseListResponse> DetermineIfCaseIsEligibleForOtherEntityCreation<TResponse>(string caseId, TResponse response, Services.IOMCaseService caseService, CancellationToken cancellationToken)
         where TResponse : BaseFluentValidationError
     {
-        omCaseListResponse = await caseService.GetCasesForCustomerByCaseId(caseId, cancellationToken);
+        OMCaseListResponse omCaseListResponse = await caseService.GetCasesForCustomerByCaseId(caseId, cancellationToken);
 
         if (!omCaseListResponse.Success)
         {
@@ -109,5 +108,7 @@ public static class OMCaseUtilities
             response.SetOrUpdateErrorMessage(errorMessage);
             response.SetOrUpdateCustomException(new ConflictException(errorMessage));
         }
+
+        return omCaseListResponse;
     }
 }

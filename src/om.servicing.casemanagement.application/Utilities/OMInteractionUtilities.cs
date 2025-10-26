@@ -69,15 +69,14 @@ public static class OMInteractionUtilities
     /// <see cref="ConflictException"/> is added to indicate the conflict. </item> </list></remarks>
     /// <typeparam name="TResponse">The type of the response object, which must inherit from <see cref="BaseFluentValidationError"/>.</typeparam>
     /// <param name="interactionId">The unique identifier of the interaction to validate.</param>
-    /// <param name="omInteractionListResponse">An object that will be populated with the result of retrieving interactions for the specified interaction ID.</param>
     /// <param name="response">The response object to update with error messages or exceptions if the interaction is not eligible.</param>
     /// <param name="interactionService">The service used to retrieve interaction data for the specified interaction ID.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns></returns>
-    public async static Task DetermineIfInteractionIsEligibleForOtherEntityCreation<TResponse>(string interactionId, OMInteractionListResponse omInteractionListResponse, TResponse response, Services.IOMInteractionService interactionService, CancellationToken cancellationToken)
+    public async static Task<OMInteractionListResponse> DetermineIfInteractionIsEligibleForOtherEntityCreation<TResponse>(string interactionId, TResponse response, Services.IOMInteractionService interactionService, CancellationToken cancellationToken)
         where TResponse : BaseFluentValidationError
     {
-        omInteractionListResponse = await interactionService.GetInteractionsForInteractionIdAsync(interactionId, cancellationToken);
+        OMInteractionListResponse omInteractionListResponse = await interactionService.GetInteractionsForInteractionIdAsync(interactionId, cancellationToken);
 
         if (!omInteractionListResponse.Success)
         {
@@ -107,5 +106,57 @@ public static class OMInteractionUtilities
             response.SetOrUpdateErrorMessage(errorMessage);
             response.SetOrUpdateCustomException(new ConflictException(errorMessage));
         }
+
+        return omInteractionListResponse;
+    }
+
+    /// <summary>
+    /// Prepare an OMInteraction entity for persistence by ensuring FK properties are set and clearing navigation properties
+    /// that would cause EF Core to attempt to attach duplicate tracked entities (for example OMCase).
+    /// Returns preserved values you may need after save (case id/reference).
+    /// </summary>
+    public static (string? PreservedCaseReferenceNumber, string? PreservedCaseId) PrepareInteractionForPersistence(OMInteraction interaction)
+    {
+        if (interaction == null) throw new ArgumentNullException(nameof(interaction));
+
+        string? preservedCaseReferenceNumber = interaction.Case?.ReferenceNumber;
+        string? preservedCaseId = interaction.Case?.Id;
+
+        // Ensure FK is set (prefer the navigation value if present)
+        if (!string.IsNullOrWhiteSpace(interaction.Case?.Id))
+        {
+            interaction.CaseId = interaction.Case.Id;
+        }
+
+        // Clear top-level Case navigation so EF won't try to attach a second OMCase instance
+        interaction.Case = null;
+
+        // If transactions exist, ensure their FKs are set and clear their navigations too.
+        if (interaction.Transactions != null)
+        {
+            foreach (var tx in interaction.Transactions)
+            {
+                if (!string.IsNullOrWhiteSpace(tx.Case?.Id))
+                {
+                    tx.CaseId = tx.Case.Id;
+                }
+
+                if (!string.IsNullOrWhiteSpace(tx.Interaction?.Id))
+                {
+                    tx.InteractionId = tx.Interaction.Id;
+                }
+
+                if (tx.TransactionType != null && !string.IsNullOrWhiteSpace(tx.TransactionType.Id))
+                {
+                    tx.TransactionTypeId = tx.TransactionType.Id;
+                }
+
+                tx.Case = null;
+                tx.Interaction = null;
+                tx.TransactionType = null;
+            }
+        }
+
+        return (preservedCaseReferenceNumber, preservedCaseId);
     }
 }
