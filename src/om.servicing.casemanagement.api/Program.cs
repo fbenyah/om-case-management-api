@@ -11,7 +11,7 @@ namespace om.servicing.casemanagement.api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +20,8 @@ public class Program
 
         var app = builder.Build();
 
-        ConfigureApplication(app);
-        app.Run();
+        await ConfigureApplication(app);
+        await app.RunAsync();
     }
 
     private static void RegisterServices(WebApplicationBuilder builder)
@@ -92,7 +92,7 @@ public class Program
                     .RegisterCustomServices();
     }
 
-    private static void ConfigureApplication(WebApplication app)
+    private static async Task ConfigureApplication(WebApplication app)
     {
         Console.WriteLine($"Environment: {app.Environment.EnvironmentName} IsProduction: {app.Environment.IsProduction()} IsStaging: {app.Environment.IsStaging()}"); // This is production
         Console.WriteLine($"Environment directly from variable: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
@@ -142,5 +142,8 @@ public class Program
 
         app.MapControllers();
         app.UseErrorHandlingMiddleware();
+
+        // run migrations and seeders
+        await app.Services.MigrateDatabaseAndSeedAsync();
     }
 }
