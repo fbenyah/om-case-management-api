@@ -12,7 +12,7 @@ public class BaseItemExistsResponseTests
         var response = new TestBaseItemExistsResponse();
         Assert.NotNull(response);
         Assert.False(response.Data);
-        Assert.True((DateTime.Now - response.ResponseTime).TotalSeconds < 5);
+        Assert.True((DateTime.UtcNow - response.ResponseTime).TotalSeconds < 5);
     }
 
     [Fact]

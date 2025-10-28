@@ -10,7 +10,7 @@ public class ServiceBaseResponseTests
     public void Constructor_InitializesResponseTimeAndData()
     {
         var response = new TestServiceBaseResponse();
-        Assert.True((DateTime.Now - response.ResponseTime).TotalSeconds < 2);
+        Assert.True((DateTime.UtcNow - response.ResponseTime).TotalSeconds < 2);
         Assert.Null(response.Data);
     }
 

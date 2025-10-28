@@ -10,7 +10,7 @@ public class TransactionStatusTests
     public void Enum_HasExpectedNamesAndCount()
     {
         var names = Enum.GetNames(typeof(TransactionStatus));
-        Assert.Equal(new[] { "Unknown", "Aborted", "Submitted", "InProgress", "Cancelled", "Closed" }, names);
+        Assert.Equal(new[] { "Unknown", "Aborted", "Submitted", "InProgress", "Cancelled", "Closed", "Received" }, names);
     }
 
     [Fact]
@@ -22,6 +22,7 @@ public class TransactionStatusTests
         Assert.Equal(4, (int)TransactionStatus.InProgress);
         Assert.Equal(5, (int)TransactionStatus.Cancelled);
         Assert.Equal(6, (int)TransactionStatus.Closed);
+        Assert.Equal(7, (int)TransactionStatus.Received);
     }
 
     private static string? GetDescription(TransactionStatus status)
@@ -40,5 +41,6 @@ public class TransactionStatusTests
         Assert.Equal("InProgress", GetDescription(TransactionStatus.InProgress));
         Assert.Equal("Cancelled", GetDescription(TransactionStatus.Cancelled));
         Assert.Equal("Closed", GetDescription(TransactionStatus.Closed));
+        Assert.Equal("Received", GetDescription(TransactionStatus.Received));
     }
 }

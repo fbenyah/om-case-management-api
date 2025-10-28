@@ -223,7 +223,7 @@ public class OMCaseServiceTests
     {
         var dto = new OMCaseDto
         {
-            Channel = "PublicWeb",
+            Channel = "Public Web",
             IdentificationNumber = "ID123",
             Status = "Open"
         };
@@ -243,7 +243,7 @@ public class OMCaseServiceTests
         _caseRepositoryMock.Verify(r => r.AddAsync(It.Is<OMCase>(c =>
             c.IdentificationNumber == "ID123" &&
             c.Status == "Open" &&
-            c.Channel == "PublicWeb" &&
+            c.Channel == "Public Web" &&
             !string.IsNullOrWhiteSpace(c.ReferenceNumber) &&
             !string.IsNullOrWhiteSpace(c.Id)
         ), CancellationToken.None), Times.Once);
@@ -254,7 +254,7 @@ public class OMCaseServiceTests
     {
         var dto = new OMCaseDto
         {
-            Channel = "PublicWeb",
+            Channel = "Public Web",
             IdentificationNumber = "ID123",
             Status = "Open"
         };
@@ -276,7 +276,7 @@ public class OMCaseServiceTests
     {
         var dto = new OMCaseDto
         {
-            Channel = "PublicWeb",
+            Channel = "Public Web",
             IdentificationNumber = "ID123",
             Status = "Open"
         };
@@ -443,7 +443,7 @@ public class OMCaseServiceTests
     {
         var dto = new OMCaseDto
         {
-            Channel = "PublicWeb",
+            Channel = "Public Web",
             IdentificationNumber = "ID123",
             Status = "Open"
         };

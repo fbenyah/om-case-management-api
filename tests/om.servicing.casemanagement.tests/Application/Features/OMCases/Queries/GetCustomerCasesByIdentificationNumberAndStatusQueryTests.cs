@@ -10,8 +10,8 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryTests
     public void Constructor_InitializesPropertiesToEmptyStrings()
     {
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery();
-        Assert.Equal(string.Empty, query.Status.GetDescription());
-        Assert.Equal(string.Empty, query.IdentificationNumber);
+        Assert.Equal("Unknown", query.Status.GetDescription());
+        Assert.Equal("Unknown", query.IdentificationNumber);
     }
 
     [Fact]
