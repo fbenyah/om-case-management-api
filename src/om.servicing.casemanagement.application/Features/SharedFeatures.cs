@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using OM.RequestFramework.Core.Logging;
+﻿using OM.RequestFramework.Core.Logging;
 
 namespace om.servicing.casemanagement.application.Features;
 
