@@ -36,7 +36,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("Case Id is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         };
 
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case123", CancellationToken.None))
+            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("case123", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "case123" };
@@ -61,7 +61,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(serviceResponse.Data, result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case123", CancellationToken.None), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("case123", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         serviceResponse.SetOrUpdateCustomExceptions(new List<ICustomException> { new ClientException("custom-ex") });
 
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("caseErr", CancellationToken.None))
+            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("caseErr", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "caseErr" };
@@ -84,7 +84,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         Assert.Contains("other error", result.ErrorMessages);
         Assert.NotNull(result.CustomExceptions);
         Assert.Contains(result.CustomExceptions, ex => ex is ClientException);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("caseErr", CancellationToken.None), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("caseErr", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         };
 
         _interactionServiceMock
-            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("caseEmpty", CancellationToken.None))
+            .Setup(s => s.GetInteractionsForCaseByCaseIdAsync("caseEmpty", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetInteractionsForCaseByCaseIdQuery { CaseId = "caseEmpty" };
@@ -105,6 +105,6 @@ public class GetInteractionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.True(result.Success);
         Assert.Empty(result.Data);
-        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("caseEmpty", CancellationToken.None), Times.Once);
+        _interactionServiceMock.Verify(s => s.GetInteractionsForCaseByCaseIdAsync("caseEmpty", null, CancellationToken.None), Times.Once);
     }
 }

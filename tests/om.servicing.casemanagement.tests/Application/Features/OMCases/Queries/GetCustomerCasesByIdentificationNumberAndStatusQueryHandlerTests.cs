@@ -42,7 +42,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         Assert.Contains("Identification number is required.", result.ErrorMessages);
         Assert.False(result.Success);
         Assert.Empty(result.Data);
-        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
@@ -63,7 +63,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         Assert.Contains("Status of case(s) is required.", result.ErrorMessages);
         Assert.False(result.Success);
         Assert.Empty(result.Data);
-        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         };
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", CancellationToken.None))
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", null, CancellationToken.None))
             .ReturnsAsync(caseListResponse);
 
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
@@ -93,7 +93,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(caseListResponse.Data, result.Data);
-        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", CancellationToken.None), Times.Once);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         caseListResponse.SetOrUpdateErrorMessage("Service error");
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", CancellationToken.None))
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", null, CancellationToken.None))
             .ReturnsAsync(caseListResponse);
 
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
@@ -121,7 +121,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         Assert.False(result.Success);
         Assert.Contains("Service error", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", CancellationToken.None), Times.Once);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Open", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         };
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Closed", CancellationToken.None))
+            .Setup(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Closed", null, CancellationToken.None))
             .ReturnsAsync(caseListResponse);
 
         var query = new GetCustomerCasesByIdentificationNumberAndStatusQuery
@@ -148,6 +148,6 @@ public class GetCustomerCasesByIdentificationNumberAndStatusQueryHandlerTests
         Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
-        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Closed", CancellationToken.None), Times.Once);
+        _caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAndStatusAsync("123456", "Closed", null, CancellationToken.None), Times.Once);
     }
 }

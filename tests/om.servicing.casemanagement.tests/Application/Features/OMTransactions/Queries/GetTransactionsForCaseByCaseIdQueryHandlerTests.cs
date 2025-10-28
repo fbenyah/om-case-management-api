@@ -36,7 +36,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("The Case Id is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         };
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("case123", CancellationToken.None))
+            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("case123", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetTransactionsForCaseByCaseIdQuery { CaseId = "case123" };
@@ -61,7 +61,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(serviceResponse.Data, result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("case123", CancellationToken.None), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("case123", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         serviceResponse.SetOrUpdateCustomExceptions(new List<ICustomException> { new ClientException("custom-ex") });
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("caseErr", CancellationToken.None))
+            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("caseErr", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetTransactionsForCaseByCaseIdQuery { CaseId = "caseErr" };
@@ -83,7 +83,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         Assert.Contains("repo error", result.ErrorMessages);
         Assert.NotNull(result.CustomExceptions);
         Assert.Contains(result.CustomExceptions, ex => ex is ClientException);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("caseErr", CancellationToken.None), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("caseErr", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         };
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("caseEmpty", CancellationToken.None))
+            .Setup(s => s.GetTransactionsForCaseByCaseIdAsync("caseEmpty", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetTransactionsForCaseByCaseIdQuery { CaseId = "caseEmpty" };
@@ -104,6 +104,6 @@ public class GetTransactionsForCaseByCaseIdQueryHandlerTests
         Assert.NotNull(result);
         Assert.True(result.Success);
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("caseEmpty", CancellationToken.None), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCaseIdAsync("caseEmpty", null, CancellationToken.None), Times.Once);
     }
 }

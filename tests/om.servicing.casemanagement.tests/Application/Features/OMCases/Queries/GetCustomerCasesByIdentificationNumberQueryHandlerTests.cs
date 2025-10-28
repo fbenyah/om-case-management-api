@@ -22,7 +22,7 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
         Assert.False(result.Success);
         Assert.Contains("Identification number is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>(), CancellationToken.None), Times.Never);
+        caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync(It.IsAny<string>(), It.IsAny<String[]?>(), CancellationToken.None), Times.Never);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
             }
         };
 
-        caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("123", CancellationToken.None)).ReturnsAsync(cases);
+        caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("123", null, CancellationToken.None)).ReturnsAsync(cases);
 
         var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(loggingServiceMock.Object, caseServiceMock.Object);
         var query = new GetCustomerCasesByIdentificationNumberQuery { IdentificationNumber = "123" };
@@ -55,7 +55,7 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
         Assert.Equal("Phone", result.Data[1].Channel);
         Assert.Equal("ref1234", result.Data[0].ReferenceNumber);
         Assert.Equal("ref6789", result.Data[1].ReferenceNumber);
-        caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("123", CancellationToken.None), Times.Once);
+        caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("123", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
     {
         var caseServiceMock = new Mock<IOMCaseService>();
         var loggingServiceMock = new Mock<OM.RequestFramework.Core.Logging.ILoggingService>();
-        caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("456", CancellationToken.None)).ReturnsAsync(new OMCaseListResponse());
+        caseServiceMock.Setup(s => s.GetCasesForCustomerByIdentificationNumberAsync("456", null, CancellationToken.None)).ReturnsAsync(new OMCaseListResponse());
 
         var handler = new GetCustomerCasesByIdentificationNumberQueryHandler(loggingServiceMock.Object, caseServiceMock.Object);
         var query = new GetCustomerCasesByIdentificationNumberQuery { IdentificationNumber = "456" };
@@ -74,6 +74,6 @@ public class GetCustomerCasesByIdentificationNumberQueryHandlerTests
         Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Empty(result.Data);
-        caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("456", CancellationToken.None), Times.Once);
+        caseServiceMock.Verify(s => s.GetCasesForCustomerByIdentificationNumberAsync("456", null, CancellationToken.None), Times.Once);
     }
 }

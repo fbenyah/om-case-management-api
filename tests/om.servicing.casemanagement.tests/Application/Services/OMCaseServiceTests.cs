@@ -26,7 +26,7 @@ public class OMCaseServiceTests
         Assert.Contains("Identification number is required.", result.ErrorMessages);
         Assert.False(result.Success);
         Assert.Empty(result.Data);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class OMCaseServiceTests
             new OMCase { IdentificationNumber = "ID123", ReferenceNumber = "REF123", Channel = "Web" }
         };
         _caseRepositoryMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(cases);
 
         var result = await _service.GetCasesForCustomerByIdentificationNumberAsync("ID123");
@@ -46,14 +46,14 @@ public class OMCaseServiceTests
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Single(result.Data);
         Assert.Equal("ID123", result.Data[0].IdentificationNumber);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task GetCasesForCustomerByIdentificationNumberAsync_ReturnsError_WhenRepositoryThrows()
     {
         _caseRepositoryMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ReadPersistenceException("DB error"));
 
         var result = await _service.GetCasesForCustomerByIdentificationNumberAsync("ID123");
@@ -74,7 +74,7 @@ public class OMCaseServiceTests
         Assert.Contains("Both identity number and status are required.", result.ErrorMessages);
         Assert.False(result.Success);
         Assert.Empty(result.Data);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class OMCaseServiceTests
             new OMCase { IdentificationNumber = "ID123", Status = "Open", ReferenceNumber = "REF123", Channel = "Web" }
         };
         _caseRepositoryMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(cases);
 
         var result = await _service.GetCasesForCustomerByIdentificationNumberAndStatusAsync("ID123", "Open");
@@ -95,14 +95,14 @@ public class OMCaseServiceTests
         Assert.Single(result.Data);
         Assert.Equal("ID123", result.Data[0].IdentificationNumber);
         Assert.Equal("Open", result.Data[0].Status);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task GetCasesForCustomerByIdentificationNumberAndStatusAsync_ReturnsError_WhenRepositoryThrows()
     {
         _caseRepositoryMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("DB error"));
 
         var result = await _service.GetCasesForCustomerByIdentificationNumberAndStatusAsync("ID123", "Open");
@@ -119,7 +119,7 @@ public class OMCaseServiceTests
         Assert.Contains("Reference number is required.", result.ErrorMessages);
         Assert.False(result.Success);
         Assert.Empty(result.Data);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class OMCaseServiceTests
             new OMCase { ReferenceNumber = "REF123", Channel = "Web", IdentificationNumber = "ID123" }
         };
         _caseRepositoryMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(cases);
 
         var result = await _service.GetCasesForCustomerByReferenceNumberAsync("REF123");
@@ -139,14 +139,14 @@ public class OMCaseServiceTests
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Single(result.Data);
         Assert.Equal("REF123", result.Data[0].ReferenceNumber);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task GetCasesForCustomerByReferenceNumberAsync_ReturnsError_WhenRepositoryThrows()
     {
     _case_repository: _caseRepositoryMock
-        .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+        .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
         .ThrowsAsync(new Exception("DB error"));
 
         var result = await _service.GetCasesForCustomerByReferenceNumberAsync("REF123");
@@ -167,7 +167,7 @@ public class OMCaseServiceTests
         Assert.Contains("Both reference number and status are required.", result.ErrorMessages);
         Assert.False(result.Success);
         Assert.Empty(result.Data);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class OMCaseServiceTests
             new OMCase { ReferenceNumber = "REF123", Status = "Open", Channel = "Web", IdentificationNumber = "ID123" }
         };
     _case_repository: _caseRepositoryMock
-        .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+        .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
         .ReturnsAsync(cases);
 
         var result = await _service.GetCasesForCustomerByReferenceNumberAndStatusAsync("REF123", "Open");
@@ -188,14 +188,14 @@ public class OMCaseServiceTests
         Assert.Single(result.Data);
         Assert.Equal("REF123", result.Data[0].ReferenceNumber);
         Assert.Equal("Open", result.Data[0].Status);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task GetCasesForCustomerByReferenceNumberAndStatusAsync_ReturnsError_WhenRepositoryThrows()
     {
         _caseRepositoryMock
-            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("DB error"));
 
         var result = await _service.GetCasesForCustomerByReferenceNumberAndStatusAsync("REF123", "Open");
@@ -314,14 +314,14 @@ public class OMCaseServiceTests
         Assert.False(resp3.Success);
         Assert.Contains("Case Id is required.", resp3.ErrorMessages);
 
-        _caseRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task CaseExistsWithIdAsync_ReturnsTrue_WhenCaseExists()
     {
         var caseId = "CASE123";
-        _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId, CancellationToken.None)).ReturnsAsync(new OMCase { Id = caseId });
+        _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId, null, CancellationToken.None)).ReturnsAsync(new OMCase { Id = caseId });
 
         var resp = await _service.CaseExistsWithIdAsync(caseId, CancellationToken.None);
 
@@ -330,14 +330,14 @@ public class OMCaseServiceTests
         Assert.True(resp.Success);
         Assert.Empty(resp.ErrorMessages ?? new List<string>());
 
-        _caseRepositoryMock.Verify(r => r.GetByIdAsync(caseId, CancellationToken.None), Times.Once);
+        _caseRepositoryMock.Verify(r => r.GetByIdAsync(caseId, null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task CaseExistsWithIdAsync_ReturnsFalse_WhenCaseDoesNotExist()
     {
         var caseId = "CASE123";
-    _case_repository: _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId, CancellationToken.None)).ReturnsAsync((OMCase)null);
+    _case_repository: _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId, null, CancellationToken.None)).ReturnsAsync((OMCase)null);
 
         var resp = await _service.CaseExistsWithIdAsync(caseId, CancellationToken.None);
 
@@ -346,14 +346,14 @@ public class OMCaseServiceTests
         Assert.True(resp.Success); // operation succeeded, simply no case found
         Assert.Empty(resp.ErrorMessages ?? new List<string>());
 
-        _caseRepositoryMock.Verify(r => r.GetByIdAsync(caseId, CancellationToken.None), Times.Once);
+        _caseRepositoryMock.Verify(r => r.GetByIdAsync(caseId, null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task CaseExistsWithIdAsync_ReturnsFalse_AndLogs_WhenRepositoryThrows()
     {
         var caseId = "CASE123";
-        _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId, CancellationToken.None)).ThrowsAsync(new Exception("DB error"));
+        _caseRepositoryMock.Setup(r => r.GetByIdAsync(caseId, null, CancellationToken.None)).ThrowsAsync(new Exception("DB error"));
 
         var resp = await _service.CaseExistsWithIdAsync(caseId, CancellationToken.None);
 
@@ -385,14 +385,14 @@ public class OMCaseServiceTests
         Assert.False(resp3.Success);
         Assert.Contains("Reference number is required.", resp3.ErrorMessages);
 
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<CancellationToken>()), Times.Never);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task CaseExistsWithReferenceNumberAsync_ReturnsTrue_WhenCaseExists()
     {
         var referenceNumber = "REF123";
-        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), CancellationToken.None))
+        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), CancellationToken.None))
             .ReturnsAsync(new List<OMCase> { new OMCase { ReferenceNumber = referenceNumber } });
 
         var resp = await _service.CaseExistsWithReferenceNumberAsync(referenceNumber, CancellationToken.None);
@@ -402,14 +402,14 @@ public class OMCaseServiceTests
         Assert.True(resp.Success);
         Assert.Empty(resp.ErrorMessages ?? new List<string>());
 
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), CancellationToken.None), Times.Once);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task CaseExistsWithReferenceNumberAsync_ReturnsFalse_WhenCaseDoesNotExist()
     {
         var referenceNumber = "REF123";
-        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), CancellationToken.None))
+        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), CancellationToken.None))
             .ReturnsAsync(new List<OMCase>());
 
         var resp = await _service.CaseExistsWithReferenceNumberAsync(referenceNumber, CancellationToken.None);
@@ -419,14 +419,14 @@ public class OMCaseServiceTests
         Assert.True(resp.Success); // operation succeeded, simply no case found
         Assert.Empty(resp.ErrorMessages ?? new List<string>());
 
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), CancellationToken.None), Times.Once);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task CaseExistsWithReferenceNumberAsync_ReturnsFalse_AndLogs_WhenRepositoryThrows()
     {
         var referenceNumber = "REF123";
-    _case_repository: _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), CancellationToken.None))
+    _case_repository: _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), CancellationToken.None))
         .ThrowsAsync(new Exception("DB error"));
 
         var resp = await _service.CaseExistsWithReferenceNumberAsync(referenceNumber, CancellationToken.None);
@@ -460,7 +460,7 @@ public class OMCaseServiceTests
 
         // Setup repository to simulate duplicates, then unique
         var idCallCount = 0;
-        _caseRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<string>(), CancellationToken.None))
+        _caseRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<string>(), It.IsAny<String[]?>(), CancellationToken.None))
             .ReturnsAsync(() =>
             {
                 idCallCount++;
@@ -468,7 +468,7 @@ public class OMCaseServiceTests
             });
 
         var refCallCount = 0;
-        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), CancellationToken.None))
+        _caseRepositoryMock.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), CancellationToken.None))
             .ReturnsAsync(() =>
             {
                 refCallCount++;
@@ -481,8 +481,8 @@ public class OMCaseServiceTests
 
         Assert.NotNull(result);
         Assert.True(result.Success);
-        _case_repository: _caseRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<string>(), CancellationToken.None), Times.AtLeastOnce);
-        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), CancellationToken.None), Times.AtLeastOnce);
+        _case_repository: _caseRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<string>(), It.IsAny<String[]?>(), CancellationToken.None), Times.AtLeastOnce);
+        _caseRepositoryMock.Verify(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<OMCase, bool>>>(), It.IsAny<String[]?>(), CancellationToken.None), Times.AtLeastOnce);
         _caseRepositoryMock.Verify(r => r.AddAsync(It.IsAny<OMCase>(), CancellationToken.None), Times.Once);
     }
 }

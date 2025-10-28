@@ -35,7 +35,7 @@ public class CreateOMInteractionCommandHandlerTests
         caseServiceResponse.SetOrUpdateErrorMessage("Case service error");
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(caseServiceResponse);
 
         var command = new CreateOMInteractionCommand { CaseId = "CASE1" };
@@ -55,7 +55,7 @@ public class CreateOMInteractionCommandHandlerTests
         };
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(caseServiceResponse);
 
         var command = new CreateOMInteractionCommand { CaseId = "CASE_NOT_FOUND" };
@@ -75,7 +75,7 @@ public class CreateOMInteractionCommandHandlerTests
         };
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(caseServiceResponse);
 
         var command = new CreateOMInteractionCommand { CaseId = "DUP_CASE" };
@@ -102,7 +102,7 @@ public class CreateOMInteractionCommandHandlerTests
         interactionServiceResponse.SetOrUpdateErrorMessage("Interaction service error");
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(caseServiceResponse);
 
         _interactionServiceMock
@@ -140,7 +140,7 @@ public class CreateOMInteractionCommandHandlerTests
         };
 
         _caseServiceMock
-            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetCasesForCustomerByCaseId(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(caseServiceResponse);
 
         _interactionServiceMock

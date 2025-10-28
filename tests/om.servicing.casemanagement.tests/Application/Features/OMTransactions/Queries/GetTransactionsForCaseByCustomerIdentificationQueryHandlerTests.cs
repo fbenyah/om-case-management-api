@@ -36,7 +36,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.Contains("Customer identification number is required.", result.ErrorMessages);
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync(It.IsAny<string>(), It.IsAny<String[]?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         };
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None))
+            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetTransactionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "cust123" };
@@ -61,7 +61,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.True(result.Success);
         Assert.Empty(result.ErrorMessages ?? new List<string>());
         Assert.Equal(serviceResponse.Data, result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123", CancellationToken.None), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("cust123", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         };
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custEmpty", CancellationToken.None))
+            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custEmpty", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetTransactionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "custEmpty" };
@@ -82,7 +82,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.NotNull(result);
         Assert.True(result.Success);
         Assert.Empty(result.Data);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custEmpty", CancellationToken.None), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custEmpty", null, CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         serviceResponse.SetOrUpdateCustomExceptions(new List<ICustomException> { new ClientException("custom-ex") });
 
         _transactionServiceMock
-            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custErr", CancellationToken.None))
+            .Setup(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custErr", null, CancellationToken.None))
             .ReturnsAsync(serviceResponse);
 
         var query = new GetTransactionsForCaseByCustomerIdentificationQuery { CustomerIdentificationNumber = "custErr" };
@@ -104,6 +104,6 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandlerTests
         Assert.Contains("service error", result.ErrorMessages);
         Assert.NotNull(result.CustomExceptions);
         Assert.Contains(result.CustomExceptions, ex => ex is ClientException);
-        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custErr", CancellationToken.None), Times.Once);
+        _transactionServiceMock.Verify(s => s.GetTransactionsForCaseByCustomerIdentificationAsync("custErr", null, CancellationToken.None), Times.Once);
     }
 }
