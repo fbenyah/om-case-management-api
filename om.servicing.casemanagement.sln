@@ -26,8 +26,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "om.servicing.casemanagement
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "om.servicing.casemanagement.core", "src\om.servicing.casemanagement.core\om.servicing.casemanagement.core.csproj", "{5284BDA2-F669-4907-BC25-913F3D85FFCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "om.servicing.casemanagement.tests.performance", "tests\om.servicing.casemanagement.tests.performance\om.servicing.casemanagement.tests.performance.csproj", "{203AD384-3CDB-4ABD-9CC7-F35AC15CE793}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,10 +56,6 @@ Global
 		{5284BDA2-F669-4907-BC25-913F3D85FFCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5284BDA2-F669-4907-BC25-913F3D85FFCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5284BDA2-F669-4907-BC25-913F3D85FFCB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{203AD384-3CDB-4ABD-9CC7-F35AC15CE793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{203AD384-3CDB-4ABD-9CC7-F35AC15CE793}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{203AD384-3CDB-4ABD-9CC7-F35AC15CE793}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{203AD384-3CDB-4ABD-9CC7-F35AC15CE793}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,7 +68,6 @@ Global
 		{49AEA7A2-F1D8-2D98-BF95-9EFAE78E728A} = {60138915-E8AF-439C-AB3A-8DCAA93AB5B5}
 		{302489AC-8416-D230-CACA-30E46D4D12A2} = {CA2C2E21-C117-4D18-B7B2-7D8DA01795E2}
 		{5284BDA2-F669-4907-BC25-913F3D85FFCB} = {60138915-E8AF-439C-AB3A-8DCAA93AB5B5}
-		{203AD384-3CDB-4ABD-9CC7-F35AC15CE793} = {CA2C2E21-C117-4D18-B7B2-7D8DA01795E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A1DE7C94-E14D-455A-9D7D-CE61C171EC77}
