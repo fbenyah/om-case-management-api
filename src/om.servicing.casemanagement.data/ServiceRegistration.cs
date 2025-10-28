@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using om.servicing.casemanagement.data.Context;
 using om.servicing.casemanagement.data.Repositories.Shared;
+using om.servicing.casemanagement.data.Seed.Runtime;
 using om.servicing.casemanagement.domain.Entities;
 
 namespace om.servicing.casemanagement.data;
@@ -34,6 +36,32 @@ public static class ServiceRegistration
         RegisterRepositories<OMTransactionType>(services);
 
         return services;
+    }
+
+    /// <summary>
+    /// Applies pending EF Core migrations and runs runtime seeders (idempotent) for the Case Management DB.
+    /// Call this from startup once (after building the host) to ensure DB is migrated and runtime seed data exists.
+    /// </summary>
+    /// <param name="serviceProvider">An <see cref="IServiceProvider"/> (for example app.Services) used to create a scope.</param>
+    public static async Task MigrateDatabaseAndSeedAsync(this IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var provider = scope.ServiceProvider;
+        var logger = provider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ServiceRegistration));
+        try
+        {
+            var context = provider.GetRequiredService<CaseManagerContext>();
+            // apply migrations
+            await context.Database.MigrateAsync();
+
+            // run idempotent runtime seeders (example: transaction types)
+            await TransactionTypeRuntimeSeeder.EnsureTransactionTypesAsync(context);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "An error occurred while migrating or seeding the CaseManagerContext database.");
+            throw;
+        }
     }
 
     /// <summary>
