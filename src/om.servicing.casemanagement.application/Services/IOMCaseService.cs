@@ -11,7 +11,7 @@ public interface IOMCaseService
     /// <param name="caseId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<OMCaseListResponse> GetCasesForCustomerByCaseId(string caseId, CancellationToken cancellationToken = default);
+    Task<OMCaseListResponse> GetCasesForCustomerByCaseId(string caseId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of cases associated with the specified identification number.
@@ -25,7 +25,7 @@ public interface IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases associated with the specified identification
     /// number. If the identification number is invalid or an error occurs, the response will include an appropriate
     /// error message or exception.</returns>
-    Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAsync(string identificationNumber, CancellationToken cancellationToken = default);
+    Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAsync(string identificationNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of cases for a customer based on their identification number and case status.
@@ -39,7 +39,7 @@ public interface IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases matching the specified identification number
     /// and status. If no cases are found, the <see cref="OMCaseListResponse.Data"/> property will contain an empty
     /// list.</returns>
-    Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAndStatusAsync(string identityNumber, string status, CancellationToken cancellationToken = default);
+    Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAndStatusAsync(string identityNumber, string status, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of cases associated with the specified reference number.
@@ -50,10 +50,11 @@ public interface IOMCaseService
     /// error, and the error will be logged.</remarks>
     /// <param name="referenceNumber">The reference number used to identify the cases. This value cannot be null, empty, or consist only of
     /// whitespace.</param>
+    /// <param name="includeNavigationProperties">An optional array of navigation property paths to include in the query (dot-separated for nested includes).</param>
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases matching the specified reference number. If no
     /// cases are found, the <see cref="OMCaseListResponse.Data"/> property will be an empty list. If an error occurs,
     /// the response will include an appropriate error message or exception.</returns>
-    Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default);
+    Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAsync(string referenceNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of cases for a customer based on the specified reference number and status.
@@ -68,7 +69,7 @@ public interface IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases that match the specified reference number and
     /// status. If no cases are found, the <see cref="OMCaseListResponse.Data"/> property will contain an empty list. If
     /// an error occurs, the response will include an appropriate error message or exception.</returns>
-    Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAndStatusAsync(string referenceNumber, string status, CancellationToken cancellationToken = default);
+    Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAndStatusAsync(string referenceNumber, string status, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new case asynchronously based on the provided case data transfer object (DTO).

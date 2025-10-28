@@ -40,7 +40,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
     /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of associated transactions if found,  or an error
     /// message if no transactions are found or an error occurs during retrieval.</returns>
-    public async Task<OMTransactionListResponse> GetTransactionsForTransactionByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default)
+    public async Task<OMTransactionListResponse> GetTransactionsForTransactionByTransactionIdAsync(string transactionId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
 
@@ -85,7 +85,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// case ID. If no transactions are found, the response will include a custom exception indicating the absence of
     /// data.</returns>
-    public async Task<OMTransactionListResponse> GetTransactionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default)
+    public async Task<OMTransactionListResponse> GetTransactionsForCaseByCaseIdAsync(string caseId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
 
@@ -130,7 +130,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the customer's
     /// cases. If the <paramref name="customerIdentificationNumber"/> is invalid, the response will include an error
     /// message.</returns>
-    public async Task<OMTransactionListResponse> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default)
+    public async Task<OMTransactionListResponse> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
 
@@ -171,7 +171,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// case reference number.  If the case reference number is invalid or an error occurs, the response will include an
     /// appropriate error message or exception.</returns>
-    public async Task<OMTransactionListResponse> GetTransactionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default)
+    public async Task<OMTransactionListResponse> GetTransactionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
 
@@ -213,7 +213,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// interaction and customer identification number. If the input parameters are invalid or an error occurs during
     /// processing, the response will include an appropriate error message or exception.</returns>
-    public async Task<OMTransactionListResponse> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, CancellationToken cancellationToken = default)
+    public async Task<OMTransactionListResponse> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
 
@@ -255,7 +255,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// interaction reference number and interaction ID. If the input parameters are invalid or an error occurs during
     /// processing, the response will include an appropriate error message or exception.</returns>
-    public async Task<OMTransactionListResponse> GetTransactionsForInteractionByReferenceNumberAsync(string interactionReferenceNumber, string interactionId, CancellationToken cancellationToken = default)
+    public async Task<OMTransactionListResponse> GetTransactionsForInteractionByReferenceNumberAsync(string interactionReferenceNumber, string interactionId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMTransactionListResponse response = new();
 
@@ -307,7 +307,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
 
         try
         {
-            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, null, cancellationToken);
             if (omOMTransactions != null && omOMTransactions?.Count() > 0)
             {
                 response.Data = true;
@@ -353,7 +353,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
 
         try
         {
-            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber && c.CaseId == caseId, cancellationToken);
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber && c.CaseId == caseId, null, cancellationToken);
             if (omOMTransactions != null && omOMTransactions?.Count() > 0)
             {
                 response.Data = true;
@@ -392,7 +392,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
 
         try
         {
-            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.Id == transactionId, cancellationToken);
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.Id == transactionId, null, cancellationToken);
             if (omOMTransactions != null && omOMTransactions?.Count() > 0)
             {
                 response.Data = true;
@@ -438,7 +438,7 @@ public class OMTransactionService : BaseService, IOMTransactionService
 
         try
         {
-            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.Id == transactionId && c.CaseId == caseId, cancellationToken);
+            IEnumerable<OMTransaction>? omOMTransactions = await _transactionRepository.FindAsync(c => c.Id == transactionId && c.CaseId == caseId, null, cancellationToken);
             if (omOMTransactions != null && omOMTransactions?.Count() > 0)
             {
                 response.Data = true;

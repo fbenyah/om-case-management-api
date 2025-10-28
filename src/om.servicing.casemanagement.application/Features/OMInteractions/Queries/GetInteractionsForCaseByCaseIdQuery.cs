@@ -66,7 +66,7 @@ public class GetInteractionsForCaseByCaseIdQueryHandler : SharedFeatures, IReque
             return response;
         }
 
-        OMInteractionListResponse omInteractionListResponse = await _interactionService.GetInteractionsForCaseByCaseIdAsync(request.CaseId, cancellationToken);
+        OMInteractionListResponse omInteractionListResponse = await _interactionService.GetInteractionsForCaseByCaseIdAsync(request.CaseId, TransactionsIncludeNavigationProperties, cancellationToken);
         
         if (!omInteractionListResponse.Success)
         {

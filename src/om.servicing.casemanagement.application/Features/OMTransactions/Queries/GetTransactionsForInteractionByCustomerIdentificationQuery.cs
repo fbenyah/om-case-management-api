@@ -79,7 +79,7 @@ public class GetTransactionsForInteractionByCustomerIdentificationQueryHandler :
             return response;
         }
 
-        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForInteractionByCustomerIdentificationAsync(request.CustomerIdentificationNumber, request.InteractionId, cancellationToken);
+        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForInteractionByCustomerIdentificationAsync(request.CustomerIdentificationNumber, request.InteractionId, null, cancellationToken);
 
         if (!omTransactionListResponse.Success)
         {

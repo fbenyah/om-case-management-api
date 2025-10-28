@@ -78,7 +78,7 @@ public static class OMTransactionUtilities
     public async static Task<OMTransactionListResponse> DetermineIfTransactionIsEligibleForOtherEntityCreation<TResponse>(string transactionId, TResponse response, Services.IOMTransactionService transactionService, CancellationToken cancellationToken)
         where TResponse : BaseFluentValidationError
     {
-        OMTransactionListResponse omTransactionListResponse = await transactionService.GetTransactionsForTransactionByTransactionIdAsync(transactionId, cancellationToken);
+        OMTransactionListResponse omTransactionListResponse = await transactionService.GetTransactionsForTransactionByTransactionIdAsync(transactionId, null, cancellationToken);
 
         if (!omTransactionListResponse.Success)
         {

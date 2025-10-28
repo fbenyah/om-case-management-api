@@ -76,7 +76,7 @@ public static class OMInteractionUtilities
     public async static Task<OMInteractionListResponse> DetermineIfInteractionIsEligibleForOtherEntityCreation<TResponse>(string interactionId, TResponse response, Services.IOMInteractionService interactionService, CancellationToken cancellationToken)
         where TResponse : BaseFluentValidationError
     {
-        OMInteractionListResponse omInteractionListResponse = await interactionService.GetInteractionsForInteractionIdAsync(interactionId, cancellationToken);
+        OMInteractionListResponse omInteractionListResponse = await interactionService.GetInteractionsForInteractionIdAsync(interactionId, null, cancellationToken);
 
         if (!omInteractionListResponse.Success)
         {

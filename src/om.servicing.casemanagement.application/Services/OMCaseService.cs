@@ -29,7 +29,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <param name="caseId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByCaseId(string caseId, CancellationToken cancellationToken = default)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByCaseId(string caseId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -41,7 +41,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Id == caseId, cancellationToken);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Id == caseId, includeNavigationProperties, cancellationToken);
             List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
 
             if (!caseListDto.Any())
@@ -74,7 +74,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases associated with the specified identification
     /// number. If the identification number is invalid or an error occurs, the response will include an appropriate
     /// error message or exception.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAsync(string identificationNumber, CancellationToken cancellationToken = default)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAsync(string identificationNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -86,7 +86,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.IdentificationNumber == identificationNumber, cancellationToken);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.IdentificationNumber == identificationNumber, includeNavigationProperties, cancellationToken);
             List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
 
             if (!caseListDto.Any())
@@ -119,7 +119,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases matching the specified identification number
     /// and status. If no cases are found, the <see cref="OMCaseListResponse.Data"/> property will contain an empty
     /// list.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAndStatusAsync(string identityNumber, string status, CancellationToken cancellationToken = default)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByIdentificationNumberAndStatusAsync(string identityNumber, string status, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -132,7 +132,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.IdentificationNumber == identityNumber, cancellationToken);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.IdentificationNumber == identityNumber, includeNavigationProperties, cancellationToken);
             List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
 
             if (!caseListDto.Any())
@@ -162,10 +162,11 @@ public class OMCaseService : BaseService, IOMCaseService
     /// error, and the error will be logged.</remarks>
     /// <param name="referenceNumber">The reference number used to identify the cases. This value cannot be null, empty, or consist only of
     /// whitespace.</param>
+    /// <param name="includeNavigationProperties">An optional array of navigation property paths to include in the query (dot-separated for nested includes).</param>
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases matching the specified reference number. If no
     /// cases are found, the <see cref="OMCaseListResponse.Data"/> property will be an empty list. If an error occurs,
     /// the response will include an appropriate error message or exception.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken = default)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAsync(string referenceNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -177,7 +178,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, includeNavigationProperties, cancellationToken);
             List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
 
             if (!caseListDto.Any())
@@ -211,7 +212,7 @@ public class OMCaseService : BaseService, IOMCaseService
     /// <returns>An <see cref="OMCaseListResponse"/> containing the list of cases that match the specified reference number and
     /// status. If no cases are found, the <see cref="OMCaseListResponse.Data"/> property will contain an empty list. If
     /// an error occurs, the response will include an appropriate error message or exception.</returns>
-    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAndStatusAsync(string referenceNumber, string status, CancellationToken cancellationToken = default)
+    public async Task<OMCaseListResponse> GetCasesForCustomerByReferenceNumberAndStatusAsync(string referenceNumber, string status, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMCaseListResponse response = new();
 
@@ -224,7 +225,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.ReferenceNumber == referenceNumber, cancellationToken);
+            IEnumerable<OMCase> omCases = await _caseRepository.FindAsync(c => c.Status == status && c.ReferenceNumber == referenceNumber, includeNavigationProperties, cancellationToken);
             List<OMCaseDto> caseListDto = OMCaseUtilities.ReturnCaseDtoList(omCases);
 
             if (!caseListDto.Any())
@@ -320,7 +321,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            OMCase? omCase = await _caseRepository.GetByIdAsync(caseId, cancellationToken);
+            OMCase? omCase = await _caseRepository.GetByIdAsync(caseId, null, cancellationToken);
             if (omCase != null)
             {
                 response.Data = true;
@@ -357,7 +358,7 @@ public class OMCaseService : BaseService, IOMCaseService
 
         try
         {
-            IEnumerable<OMCase>? omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
+            IEnumerable<OMCase>? omCases = await _caseRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, null, cancellationToken);
             if (omCases != null && omCases?.Count() > 0)
             {
                 response.Data = true;

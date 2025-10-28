@@ -78,7 +78,7 @@ public static class OMCaseUtilities
     public async static Task<OMCaseListResponse> DetermineIfCaseIsEligibleForOtherEntityCreation<TResponse>(string caseId, TResponse response, Services.IOMCaseService caseService, CancellationToken cancellationToken)
         where TResponse : BaseFluentValidationError
     {
-        OMCaseListResponse omCaseListResponse = await caseService.GetCasesForCustomerByCaseId(caseId, cancellationToken);
+        OMCaseListResponse omCaseListResponse = await caseService.GetCasesForCustomerByCaseId(caseId, null, cancellationToken);
 
         if (!omCaseListResponse.Success)
         {

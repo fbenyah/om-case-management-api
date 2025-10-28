@@ -71,7 +71,7 @@ public class GetInteractionsForCaseByCustomerIdentificationQueryHandler : Shared
             return response;
         }
 
-        OMInteractionListResponse omInteractionListResponse = await _interactionService.GetInteractionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, cancellationToken);
+        OMInteractionListResponse omInteractionListResponse = await _interactionService.GetInteractionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, TransactionsIncludeNavigationProperties, cancellationToken);
         
         if (!omInteractionListResponse.Success)
         {

@@ -71,8 +71,8 @@ public class GetCustomerCasesByReferenceNumberQueryHandler : SharedFeatures, IRe
             response.SetOrUpdateErrorMessage("Reference number is required.");
             return response;
         }
-
-        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByReferenceNumberAsync(request.ReferenceNumber, cancellationToken);
+        
+        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByReferenceNumberAsync(request.ReferenceNumber, InteractionsTransactionsIncludeNavigationProperties, cancellationToken);
         
         if (!omCaseListResponse.Success)
         {

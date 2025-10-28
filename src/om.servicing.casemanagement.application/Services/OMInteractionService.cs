@@ -33,7 +33,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// <param name="cancellationToken">A token to monitor for cancellation requests. Optional.</param>
     /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the specified ID.
     /// Returns an empty list if the ID is null, empty, or whitespace, or if no interactions are found.</returns>
-    public async Task<OMInteractionListResponse> GetInteractionsForInteractionIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForInteractionIdAsync(string id, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMInteractionListResponse response = new();
 
@@ -45,7 +45,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.Id == id);
+            IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.Id == id, includeNavigationProperties, cancellationToken);
 
             if (omInteractions == null || !omInteractions.Any())
             {
@@ -76,7 +76,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// whitespace.</param>
     /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions for the specified case. Returns
     /// an empty list if the <paramref name="caseId"/> is null, empty, or whitespace, or if no interactions are found.</returns>
-    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCaseIdAsync(string caseId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMInteractionListResponse response = new();
 
@@ -88,7 +88,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.CaseId == caseId);
+            IEnumerable<OMInteraction> omInteractions = await _interactionRepository.FindAsync(t => t.CaseId == caseId, includeNavigationProperties, cancellationToken);
 
             if (omInteractions == null || !omInteractions.Any())
             {
@@ -120,7 +120,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// whitespace.</param>
     /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the customer's
     /// cases. Returns an empty list if the customer has no cases or if the provided identification number is invalid.</returns>
-    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMInteractionListResponse response = new();
 
@@ -134,7 +134,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            omCaseListResponse = await _omCaseService.GetCasesForCustomerByIdentificationNumberAsync(customerIdentificationNumber);
+            omCaseListResponse = await _omCaseService.GetCasesForCustomerByIdentificationNumberAsync(customerIdentificationNumber, includeNavigationProperties, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -145,7 +145,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
             return response;
         }
 
-        await GetListOfInteractions(omCaseListResponse, customerIdentificationNumber, response);
+        await GetListOfInteractions(omCaseListResponse, customerIdentificationNumber, response, cancellationToken);
         return response;
     }
 
@@ -162,7 +162,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the specified
     /// case. Returns an empty list if the case reference number is invalid, no cases are found, or no interactions are
     /// associated with the case.</returns>
-    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default)
+    public async Task<OMInteractionListResponse> GetInteractionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default)
     {
         OMInteractionListResponse response = new();
 
@@ -176,7 +176,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            omCaseListResponse = await _omCaseService.GetCasesForCustomerByReferenceNumberAsync(caseReferenceNumber);
+            omCaseListResponse = await _omCaseService.GetCasesForCustomerByReferenceNumberAsync(caseReferenceNumber, includeNavigationProperties, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -187,7 +187,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
             return response;
         }
 
-        await GetListOfInteractions(omCaseListResponse, caseReferenceNumber, response);
+        await GetListOfInteractions(omCaseListResponse, caseReferenceNumber, response, cancellationToken);
         return response;
     }
 
@@ -213,7 +213,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            IEnumerable<OMInteraction>? omInteractions= await _interactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, cancellationToken);
+            IEnumerable<OMInteraction>? omInteractions= await _interactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber, null, cancellationToken);
             if (omInteractions != null && omInteractions?.Count() > 0)
             {
                 response.Data = true;
@@ -259,7 +259,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber && c.CaseId == caseId, cancellationToken);
+            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.ReferenceNumber == referenceNumber && c.CaseId == caseId, null, cancellationToken);
             if (omInteractions != null && omInteractions?.Count() > 0)
             {
                 response.Data = true;
@@ -298,7 +298,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.Id == interactionId, cancellationToken);
+            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.Id == interactionId, null, cancellationToken);
             if (omInteractions != null && omInteractions?.Count() > 0)
             {
                 response.Data = true;
@@ -344,7 +344,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
 
         try
         {
-            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.Id == interactionId && c.CaseId == caseId, cancellationToken);
+            IEnumerable<OMInteraction>? omInteractions = await _interactionRepository.FindAsync(c => c.Id == interactionId && c.CaseId == caseId, null, cancellationToken);
             if (omInteractions != null && omInteractions?.Count() > 0)
             {
                 response.Data = true;
@@ -510,7 +510,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
     /// <param name="caseSearchParameter">The search parameter used to identify the cases, included in error messages for context.</param>
     /// <param name="response">The response object to populate with the resulting list of interactions or error information.</param>
     /// <returns></returns>
-    private async Task GetListOfInteractions(OMCaseListResponse omCaseListResponse, string caseSearchParameter, OMInteractionListResponse response)
+    private async Task GetListOfInteractions(OMCaseListResponse omCaseListResponse, string caseSearchParameter, OMInteractionListResponse response, CancellationToken cancellationToken = default)
     {
         if (!omCaseListResponse.Success)
         {
@@ -543,7 +543,7 @@ public class OMInteractionService : BaseService, IOMInteractionService
             try
             {
                 // if Interactions not populated in case, fetch from repo
-                OMInteractionListResponse interactionsForCaseResponse = await GetInteractionsForCaseByCaseIdAsync(omCaseDto.Id);
+                OMInteractionListResponse interactionsForCaseResponse = await GetInteractionsForCaseByCaseIdAsync(omCaseDto.Id, new[] { "Transactions" }, cancellationToken);
 
                 if (!interactionsForCaseResponse.Success)
                 {

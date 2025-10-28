@@ -67,7 +67,7 @@ public class GetTransactionsForCaseByCaseIdQueryHandler : SharedFeatures, IReque
             return response;
         }
 
-        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForCaseByCaseIdAsync(request.CaseId, cancellationToken);
+        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForCaseByCaseIdAsync(request.CaseId, null, cancellationToken);
 
         if (!omTransactionListResponse.Success)
         {

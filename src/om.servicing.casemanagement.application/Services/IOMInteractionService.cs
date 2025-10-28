@@ -12,7 +12,7 @@ public interface IOMInteractionService
     /// <param name="cancellationToken">A token to monitor for cancellation requests. Optional.</param>
     /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the specified ID.
     /// Returns an empty list if the ID is null, empty, or whitespace, or if no interactions are found.</returns>
-    Task<OMInteractionListResponse> GetInteractionsForInteractionIdAsync(string id, CancellationToken cancellationToken = default);
+    Task<OMInteractionListResponse> GetInteractionsForInteractionIdAsync(string id, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of interactions associated with the specified case ID.
@@ -21,7 +21,7 @@ public interface IOMInteractionService
     /// <returns>A task that represents the asynchronous operation. The task result contains an <see
     /// cref="OMInteractionListResponse"/> objects representing the interactions for the specified case. The list will be empty
     /// if no interactions are found.</returns>
-    Task<OMInteractionListResponse> GetInteractionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default);
+    Task<OMInteractionListResponse> GetInteractionsForCaseByCaseIdAsync(string caseId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of interactions associated with a specific customer identification number.
@@ -31,7 +31,7 @@ public interface IOMInteractionService
     /// <returns>A task that represents the asynchronous operation. The task result contains an  <see
     /// cref="OMInteractionListResponse"/> objects representing the interactions for the specified customer. If no interactions
     /// are found, the list will be empty.</returns>
-    Task<OMInteractionListResponse> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default);
+    Task<OMInteractionListResponse> GetInteractionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of interactions associated with a case identified by the specified case reference number.
@@ -46,7 +46,7 @@ public interface IOMInteractionService
     /// <returns>An <see cref="OMInteractionListResponse"/> objects representing the interactions associated with the specified
     /// case. Returns an empty list if the case reference number is invalid, no cases are found, or no interactions are
     /// associated with the case.</returns>
-    Task<OMInteractionListResponse> GetInteractionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default);
+    Task<OMInteractionListResponse> GetInteractionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously determines whether an interaction exists with the specified reference number.

@@ -62,7 +62,7 @@ public class GetTransactionsForCaseByCustomerIdentificationQueryHandler : Shared
             return response;
         }
 
-        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, cancellationToken);
+        OMTransactionListResponse omTransactionListResponse = await _transactionService.GetTransactionsForCaseByCustomerIdentificationAsync(request.CustomerIdentificationNumber, null, cancellationToken);
 
         if (!omTransactionListResponse.Success)
         {

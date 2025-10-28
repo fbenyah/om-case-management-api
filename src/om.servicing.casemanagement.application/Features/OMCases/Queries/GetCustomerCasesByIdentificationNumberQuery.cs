@@ -72,7 +72,7 @@ public class GetCustomerCasesByIdentificationNumberQueryHandler : SharedFeatures
             return response;
         }
 
-        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAsync(request.IdentificationNumber, cancellationToken);
+        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByIdentificationNumberAsync(request.IdentificationNumber, InteractionsTransactionsIncludeNavigationProperties, cancellationToken);
         
         if (!omCaseListResponse.Success)
         {

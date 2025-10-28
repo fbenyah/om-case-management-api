@@ -81,7 +81,7 @@ public class GetCustomerCasesByReferenceNumberAndStatusQueryHandler : SharedFeat
             return response;
         }
 
-        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByReferenceNumberAndStatusAsync(request.ReferenceNumber, request.Status.GetDescription(), cancellationToken);
+        OMCaseListResponse omCaseListResponse = await _caseService.GetCasesForCustomerByReferenceNumberAndStatusAsync(request.ReferenceNumber, request.Status.GetDescription(), InteractionsTransactionsIncludeNavigationProperties, cancellationToken);
         
         if (!omCaseListResponse.Success)
         {            

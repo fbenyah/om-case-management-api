@@ -18,7 +18,7 @@ public interface IOMTransactionService
     /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of associated transactions if found,  or an error
     /// message if no transactions are found or an error occurs during retrieval.</returns>
-    Task<OMTransactionListResponse> GetTransactionsForTransactionByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForTransactionByTransactionIdAsync(string transactionId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with the specified case ID.
@@ -31,7 +31,7 @@ public interface IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// case ID. If no transactions are found, the response will include a custom exception indicating the absence of
     /// data.</returns>
-    Task<OMTransactionListResponse> GetTransactionsForCaseByCaseIdAsync(string caseId, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForCaseByCaseIdAsync(string caseId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with cases for a given customer identification number.
@@ -44,7 +44,7 @@ public interface IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the customer's
     /// cases. If the <paramref name="customerIdentificationNumber"/> is invalid, the response will include an error
     /// message.</returns>
-    Task<OMTransactionListResponse> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForCaseByCustomerIdentificationAsync(string customerIdentificationNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific case reference number.
@@ -58,7 +58,7 @@ public interface IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// case reference number.  If the case reference number is invalid or an error occurs, the response will include an
     /// appropriate error message or exception.</returns>
-    Task<OMTransactionListResponse> GetTransactionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForCaseByCaseReferenceNumberAsync(string caseReferenceNumber, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific interaction and customer identification number.
@@ -73,7 +73,7 @@ public interface IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// interaction and customer identification number. If the input parameters are invalid or an error occurs during
     /// processing, the response will include an appropriate error message or exception.</returns>
-    Task<OMTransactionListResponse> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForInteractionByCustomerIdentificationAsync(string customerIdentificationNumber, string interactionId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of transactions associated with a specific interaction reference number and interaction ID.
@@ -87,7 +87,7 @@ public interface IOMTransactionService
     /// <returns>An <see cref="OMTransactionListResponse"/> containing the list of transactions associated with the specified
     /// interaction reference number and interaction ID. If the input parameters are invalid or an error occurs during
     /// processing, the response will include an appropriate error message or exception.</returns>
-    Task<OMTransactionListResponse> GetTransactionsForInteractionByReferenceNumberAsync(string interactionReferenceNumber, string interactionId, CancellationToken cancellationToken = default);
+    Task<OMTransactionListResponse> GetTransactionsForInteractionByReferenceNumberAsync(string interactionReferenceNumber, string interactionId, string[]? includeNavigationProperties = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Checks whether a transaction with the specified reference number exists in the system.
