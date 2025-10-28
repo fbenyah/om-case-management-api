@@ -1,5 +1,4 @@
 ﻿using om.servicing.casemanagement.domain.Entities;
-using om.servicing.casemanagement.domain.Utilities;
 
 namespace om.servicing.casemanagement.data.Seed;
 
@@ -12,44 +11,24 @@ public static class MigrationDummyData
     /// - Case 2: one interaction, two transactions: a POCR resolved immediately and a long-running external transaction.
     /// </summary>
     /// <param name="createdDate">Optional created date to use for all seed rows (default = UtcNow). Use a fixed date to keep migrations deterministic.</param>
-    public static (IEnumerable<OMTransactionType> TransactionTypes, IEnumerable<OMCase> Cases, IEnumerable<OMInteraction> Interactions, IEnumerable<OMTransaction> Transactions) GetTwoCaseGraph(DateTime? createdDate = null)
+    public static (IEnumerable<OMCase> Cases, IEnumerable<OMInteraction> Interactions, IEnumerable<OMTransaction> Transactions) GetTwoCaseGraph(DateTime? createdDate = null)
     {
         var now = createdDate ?? DateTime.UtcNow;
 
-        // Deterministic ids make migration generation predictable
-        string txTypePolicyId = UlidUtils.NewUlidString();
-        string txTypePocrId = UlidUtils.NewUlidString();
+        // these are taken from the migration transaction type seed to ensure FK consistency
+        string txTypePolicyId = "01JFJ0R4E5SK1Q7HBS9D5RX2CP";
+        string txTypePocrId = "01JFJ0R4E4MTHQ4KSNVQ5H1K3W";
 
-        string case1Id = UlidUtils.NewUlidString();
-        string case2Id = UlidUtils.NewUlidString();
+        string case1Id = "01K8PEVXGNPEHC9PYZDRDHMFW2";
+        string case2Id = "01K8PEVXGNTF2YWGY9BNYWST6N";
 
-        string interaction1Case1Id = UlidUtils.NewUlidString();
-        string interaction2Case1Id = UlidUtils.NewUlidString();
-        string interaction1Case2Id = UlidUtils.NewUlidString();
+        string interaction1Case1Id = "01K8PEVXGN1PYYFTNT8XYAAMCS";
+        string interaction2Case1Id = "01K8PEVXGNPBRVW4WBSCRYCFDN";
+        string interaction1Case2Id = "01K8PEVXGNAQM83WN75WT8QSYK";
 
-        string transactionCase1PolicyId = UlidUtils.NewUlidString();
-        string transactionCase2PocrId = UlidUtils.NewUlidString();
-        string transactionCase2ExternalId = UlidUtils.NewUlidString();
-
-        var transactionTypes = new List<OMTransactionType>
-        {
-            new OMTransactionType
-            {
-                Id = txTypePocrId,
-                Name = "POCR",
-                Description = "Point-of-contact resolution transaction.",
-                RequiresApproval = false,
-                CreatedDate = now
-            },
-            new OMTransactionType
-            {
-                Id = txTypePolicyId,
-                Name = "Policy",
-                Description = "Policy-related transaction.",
-                RequiresApproval = true,
-                CreatedDate = now
-            }
-        };
+        string transactionCase1PolicyId = "01K8PEVXGNK2PXA93FMVDPPC60";
+        string transactionCase2PocrId = "01K8PEVXGPRPP0YDYFHHAH1SXC";
+        string transactionCase2ExternalId = "01K8PEVXGPYWWVBEHA37C3NPA4";
 
         var cases = new List<OMCase>
         {
@@ -181,6 +160,6 @@ public static class MigrationDummyData
             }
         };
 
-        return (transactionTypes, cases, interactions, transactions);
+        return (cases, interactions, transactions);
     }
 }
