@@ -26,35 +26,21 @@ public class CaseManagerContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<OMTransactionType>().HasData(
-            new OMTransactionType
-            {
-                Id = UlidUtils.NewUlidString(),
-                Name = "POCR",
-                Description = "A standard transaction that does not require approval/consent and requirements on an identified customer and policies owned by that customer.",
-                RequiresApproval = false
-            },
-            new OMTransactionType
-            {
-                Id = UlidUtils.NewUlidString(),
-                Name = "Policy",
-                Description = "A transaction that relates to a policy number.",
-                RequiresApproval = true
-            },
-            new OMTransactionType
-            {
-                Id = UlidUtils.NewUlidString(),
-                Name = "Non-Policy",
-                Description = "A transaction that does not relate to a policy number.",
-                RequiresApproval = false
-            }
-        );
+        RunSeedTransactionTypes(modelBuilder);
 
-        // Runs seed data for migrations
-        RunSeedData(modelBuilder);
+        // Runs seed dummy data
+        RunSeedDummyData(modelBuilder);
     }
 
-    private void RunSeedData(ModelBuilder modelBuilder)
+    private void RunSeedTransactionTypes(ModelBuilder modelBuilder)
+    {
+        // pass fixed date to keep migration deterministic
+        var createdDate = new DateTime(2025, 10, 28);
+        var transactionTypes = MigrationTransactionTypeSeed.ForMigration(createdDate).ToArray();
+        modelBuilder.Entity<OMTransactionType>().HasData(transactionTypes.ToArray());
+    }
+
+    private void RunSeedDummyData(ModelBuilder modelBuilder)
     {
         // pass fixed date to keep migration deterministic
         var seed = MigrationDummyData.GetTwoCaseGraph(new DateTime(2025, 10, 28));
