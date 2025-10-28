@@ -27,6 +27,10 @@ public static class ServiceRegistration
         services.AddDbContextPool<CaseManagerContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("CaseManagementDatabasePostgres"));
+
+            // Enable only for debugging —> shows actual key values in exceptions/logs
+            options.EnableSensitiveDataLogging();
+            options.EnableDetailedErrors();
         });
 
         // Register the generic repository implementations
