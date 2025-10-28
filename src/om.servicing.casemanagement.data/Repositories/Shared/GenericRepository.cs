@@ -25,19 +25,83 @@ public class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
         _dbSet = _context.Set<TEntity>();
     }
 
-    public async Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Asynchronously retrieves an entity by its identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the entity to retrieve. Must not be null.</param>
+    /// <param name="includePaths">An optional array of navigation property paths to include in the query (dot-separated for nested includes).  If null, no related entities are
+    /// included.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the entity of type <typeparamref
+    /// name="TEntity"/>  if found; otherwise, <see langword="null"/>.</returns>
+    public async Task<TEntity?> GetByIdAsync(object id, string[]? includePaths = null, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync(id, cancellationToken);
+        // If no includes requested, use FindAsync (uses primary key lookup and is efficient)
+        if (includePaths == null || includePaths.Length == 0)
+        {
+            return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        }
+
+        // Build query with includes
+        IQueryable<TEntity> query = IncludePaths(includePaths);
+
+        // Resolve primary key metadata to build a predicate
+        var entityType = _context.Model.FindEntityType(typeof(TEntity));
+        var primaryKey = entityType?.FindPrimaryKey();
+        if (primaryKey == null || primaryKey.Properties.Count == 0)
+            throw new InvalidOperationException($"Entity {typeof(TEntity).Name} does not have a primary key defined.");
+
+        // Single key common case
+        if (primaryKey.Properties.Count == 1)
+        {
+            var keyProp = primaryKey.Properties[0];
+            var propName = keyProp.Name;
+
+            var parameter = Expression.Parameter(typeof(TEntity), "e");
+            var left = Expression.PropertyOrField(parameter, propName);
+
+            // convert incoming id to the property CLR type
+            var converted = Convert.ChangeType(id, left.Type);
+            var constant = Expression.Constant(converted, left.Type);
+
+            var body = Expression.Equal(left, constant);
+            var lambda = Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+
+            return await query.FirstOrDefaultAsync(lambda, cancellationToken);
+        }
+
+        // Composite key: expect id to be object[] with values in key order
+        if (id is not object[] keyValues || keyValues.Length != primaryKey.Properties.Count)
+            throw new ArgumentException("For composite primary keys, provide id as object[] with values in key order.", nameof(id));
+
+        var param = Expression.Parameter(typeof(TEntity), "e");
+        Expression? composite = null;
+        for (int i = 0; i < primaryKey.Properties.Count; i++)
+        {
+            var prop = primaryKey.Properties[i];
+            var left = Expression.PropertyOrField(param, prop.Name);
+            var converted = Convert.ChangeType(keyValues[i], left.Type);
+            var constant = Expression.Constant(converted, left.Type);
+            var equal = Expression.Equal(left, constant);
+            composite = composite == null ? equal : Expression.AndAlso(composite, equal);
+        }
+
+        var compositeLambda = Expression.Lambda<Func<TEntity, bool>>(composite!, param);
+        return await query.FirstOrDefaultAsync(compositeLambda, cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetAllAsync(string[]? includePaths = null, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.ToListAsync(cancellationToken);
+        IQueryable<TEntity> query = IncludePaths(includePaths);
+
+        return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, string[]? includePaths = null, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.Where(predicate).ToListAsync(cancellationToken);
+        IQueryable<TEntity> query = IncludePaths(includePaths);
+
+        return await query.Where(predicate).ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
@@ -56,5 +120,23 @@ public class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
     {
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private IQueryable<TEntity> IncludePaths(string[]? includePaths = null)
+    {
+        IQueryable<TEntity> query = _dbSet;
+
+        if (includePaths != null)
+        {
+            foreach (var path in includePaths)
+            {
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    query = query.Include(path);
+                }
+            }
+        }
+
+        return query;
     }
 }
