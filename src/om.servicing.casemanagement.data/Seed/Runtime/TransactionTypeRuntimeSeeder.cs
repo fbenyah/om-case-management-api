@@ -10,7 +10,7 @@ public static class TransactionTypeRuntimeSeeder
         // simple idempotent check by Name (choose a key that makes sense)
         var existingNames = await context.TransactionTypes.Select(t => t.Name).ToListAsync();
 
-        var toAdd = MigrationTransactionTypeSeed.ForRuntime()
+        var toAdd = MigrationTransactionTypeSeed.ForMigration()
             .Where(t => !existingNames.Contains(t.Name, System.StringComparer.OrdinalIgnoreCase))
             .ToArray();
 
