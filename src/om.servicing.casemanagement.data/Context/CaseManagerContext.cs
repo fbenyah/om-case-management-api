@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using om.servicing.casemanagement.data.Seed;
 using om.servicing.casemanagement.domain.Entities;
-using om.servicing.casemanagement.domain.Utilities;
 
 namespace om.servicing.casemanagement.data.Context;
 
@@ -34,18 +33,16 @@ public class CaseManagerContext : DbContext
 
     private void RunSeedTransactionTypes(ModelBuilder modelBuilder)
     {
-        // pass fixed date to keep migration deterministic
-        var createdDate = new DateTime(2025, 10, 28);
-        var transactionTypes = MigrationTransactionTypeSeed.ForMigration(createdDate).ToArray();
+        var transactionTypes = MigrationTransactionTypeSeed.ForMigration().ToArray();
         modelBuilder.Entity<OMTransactionType>().HasData(transactionTypes.ToArray());
     }
 
     private void RunSeedDummyData(ModelBuilder modelBuilder)
     {
         // pass fixed date to keep migration deterministic
-        var seed = MigrationDummyData.GetTwoCaseGraph(new DateTime(2025, 10, 28));
+        DateTime seedDateUtc = new DateTime(2025, 10, 28, 0, 0, 0, DateTimeKind.Utc);
+        var seed = MigrationDummyData.GetTwoCaseGraph(seedDateUtc);
 
-        modelBuilder.Entity<OMTransactionType>().HasData(seed.TransactionTypes.ToArray());
         modelBuilder.Entity<OMCase>().HasData(seed.Cases.ToArray());
         modelBuilder.Entity<OMInteraction>().HasData(seed.Interactions.ToArray());
         modelBuilder.Entity<OMTransaction>().HasData(seed.Transactions.ToArray());
