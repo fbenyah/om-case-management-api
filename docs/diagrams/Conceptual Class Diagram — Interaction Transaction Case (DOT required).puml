@@ -1,5 +1,4 @@
 @startuml
-!pragma layout smetana
 title Conceptual Model — Interactions, Transactions, Consent, and Cases
 
 skinparam classAttributeIconSize 0
