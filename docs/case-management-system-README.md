@@ -1,65 +1,71 @@
-# Case Management System — Conceptual & Interaction Model
+# Case Management System — Conceptual, Behavioural & Architectural Model
 
 ## Overview
 
-This document describes the **conceptual model, interaction flows, and lifecycle rules** for the Case Management System.
+This document is the **single source of truth** for the Case Management System. It captures the **conceptual model, behavioural flows, state machines, reference standards, event model, and DDD aggregate boundaries**.
 
-The system is designed to support **assisted channels** (Call Center, Branch) and **unassisted digital channels** (Web, App, WhatsApp) using a **single, consistent model** for:
+The system supports **assisted channels** (Call Center, Branch) and **unassisted digital channels** (Web, App, WhatsApp) using one consistent, channel-agnostic model.
 
-* Interactions
-* Transactions
-* Consent
-* Case creation and submission
+Primary goals:
 
-The goal is to ensure **traceability, auditability, and consistency** across all customer touchpoints.
+* Traceability across all customer touchpoints
+* Explicit consent-driven submission
+* Strong audit and compliance support
+* Clear ownership and lifecycle boundaries
 
 ---
 
-## Core Concepts
+## Core Domain Concepts
 
 ### 1. Interaction
 
-An **Interaction** represents a customer touchpoint with the organisation. Every customer journey begins with one or more interactions.
+An **Interaction** represents a single customer touchpoint with the organisation.
 
 Examples:
 
-* IVR Interaction (before an agent answers a call)
+* IVR Interaction (before an agent answers)
 * Agent Interaction (call center)
 * Branch Interaction (walk-in)
 * Digital Interaction (web, app, WhatsApp)
 
-Key properties:
+Rules:
 
-* Has a unique `interactionRef`
-* Has a channel and timestamps
-* May transfer to another interaction
-* Can initiate zero or more transactions
+* Every customer journey starts with one or more interactions
+* Interactions may transfer responsibility to other interactions
+* Interactions can initiate zero or more transactions
+* Interactions never submit cases
 
-> Interactions **do not submit cases**.
+Key attributes:
+
+* `interactionRef`
+* `channel`
+* `startedAt`, `endedAt`
 
 ---
 
 ### 2. Transaction
 
-A **Transaction** represents a business request initiated by a customer during an interaction.
+A **Transaction** represents a discrete business request raised by a customer during an interaction.
 
 Rules:
 
 * Every transaction is initiated by **exactly one interaction**
 * Transactions cannot exist independently
-* Transactions may be created across multiple interactions
+* Transactions may span multiple interactions via transfers
+* Transactions are immutable once included in a submitted case
 
-Examples:
+Key attributes:
 
-* Policy update
-* Claim submission
-* Account change
+* `transactionRef`
+* `type`
+* `status`
+* `createdAt`
 
 ---
 
 ### 3. Consent
 
-**Consent** is a mandatory gate before case submission.
+**Consent** is a mandatory, auditable decision that gates case submission.
 
 Rules:
 
@@ -69,13 +75,18 @@ Rules:
 
   * `GRANTED`
   * `DECLINED`
+  * `EXPIRED`
 
 Effects:
 
-* If consent is granted → case may be submitted
-* If consent is declined → case is cancelled
+* Consent granted → case may be submitted
+* Consent declined or expired → case is cancelled
 
-Consent is auditable and time-bound.
+Key attributes:
+
+* `consentRef`
+* `status`
+* `requestedAt`, `respondedAt`
 
 ---
 
@@ -85,15 +96,16 @@ A **Case** represents the formal submission of one or more transactions.
 
 Rules:
 
-* A case is created **only at submission time**
-* A case always contains **one or more transactions**
+* A case is created only at submission time
+* A case always contains one or more transactions
 * A case cannot be submitted without consent
-* Every submitted case produces a **case reference number**
+* Every submitted case produces a case reference number
 
-Case outcomes:
+Key attributes:
 
-* `SUBMITTED`
-* `CANCELLED`
+* `caseRef`
+* `status`
+* `submittedAt`
 
 The **case reference number** is the primary customer-facing identifier.
 
@@ -102,8 +114,6 @@ The **case reference number** is the primary customer-facing identifier.
 ## Channel Behaviour
 
 ### Call Center Channel
-
-Flow:
 
 1. Customer call arrives
 2. IVR interaction recorded
@@ -115,34 +125,28 @@ Flow:
 8. Case is submitted or cancelled
 9. Customer receives case reference number (if submitted)
 
-Key points:
+Notes:
 
-* IVR and Agent interactions are distinct
-* Transfers create **interaction-to-interaction links**, not new cases
-* Transactions remain linked to the interaction that initiated them
+* IVR and agent interactions are distinct
+* Transfers link interactions, not cases
+* Transactions remain linked to their initiating interaction
 
 ---
 
 ### Branch Channel
 
-Flow:
-
 1. Customer walks into branch
 2. Branch interaction recorded
 3. Branch agent interaction begins
 4. Transactions are created
-5. Optional branch agent-to-agent handover(s)
+5. Optional branch agent handover(s)
 6. Customer consent is requested
 7. Case is submitted or cancelled
 8. Customer receives case reference number (if submitted)
 
-The same rules as the call center apply, without IVR.
-
 ---
 
 ### Digital Channels (Web / App / WhatsApp)
-
-Flow:
 
 1. Customer starts a digital session
 2. Digital interaction recorded
@@ -153,26 +157,9 @@ Flow:
 
 Constraints:
 
-* Only **one transaction per case**
-* No agent interactions
+* One transaction per case
+* No agents
 * No interaction transfers
-
----
-
-## Interaction Transfers
-
-Transfers represent a **handover of responsibility**, not a new case.
-
-Examples:
-
-* Agent → Agent (call center)
-* Branch Agent → Branch Agent
-
-Rules:
-
-* Transfers link one interaction to another
-* Transactions remain linked to the interaction that created them
-* The case is shared across all interactions involved
 
 ---
 
@@ -186,44 +173,155 @@ Rules:
    * Case is created
    * Transactions are bundled
    * Case is submitted
-   * Case reference number is provided to customer
-5. If consent declined:
+   * Case reference number is provided
+5. If consent declined or expired:
 
    * Case is cancelled
    * Customer is notified
 
 ---
 
-## Design Principles
+## State Machines
 
-* Channel-agnostic core model
-* Explicit separation of interactions, transactions, and cases
-* Consent-first compliance
-* Full traceability across transfers
-* Single submission point per case
+### Interaction States
+
+* `STARTED`
+* `IN_PROGRESS`
+* `TRANSFERRED`
+* `ENDED`
 
 ---
 
-## Future Extensions (Not Yet Implemented)
+### Transaction States
 
-* Consent versioning and wording history
-* Case state machine (`DRAFT`, `AWAITING_CONSENT`, etc.)
-* Event-driven architecture (`TransactionCreated`, `ConsentGranted`)
-* Resume-later / abandoned journey handling
-* Reporting and audit views
+* `CREATED`
+* `VALIDATED`
+* `INCLUDED_IN_CASE`
+
+---
+
+### Consent States
+
+* `REQUESTED`
+* `GRANTED`
+* `DECLINED`
+* `EXPIRED`
+
+---
+
+### Case States
+
+* `DRAFT`
+* `AWAITING_CONSENT`
+* `SUBMITTED`
+* `CANCELLED`
+
+---
+
+## Reference Number Strategy
+
+Reference numbers are immutable, unique, and human-readable.
+
+### Format
+
+```
+<ENTITY>-<CHANNEL>-<YYYYMMDD>-<SEQUENCE>
+```
+
+### Examples
+
+* Interaction: `INT-CALL-20260122-000123`
+* IVR Interaction: `IVR-CALL-20260122-000045`
+* Agent Interaction: `AGT-CALL-20260122-000067`
+* Branch Interaction: `BRN-BRANCH-20260122-000031`
+* Digital Interaction: `DIG-WEB-20260122-000812`
+* Transaction: `TXN-GENERIC-20260122-004921`
+* Consent: `CNS-20260122-000334`
+* Case: `CASE-20260122-000118`
+
+Rules:
+
+* Generated once
+* Never reused
+* Never mutated
+* Case reference is customer-facing
+
+---
+
+## Event Model
+
+The system is designed to support an **event-driven architecture**.
+
+### Core Events
+
+* `InteractionStarted`
+* `InteractionTransferred`
+* `TransactionCreated`
+* `ConsentRequested`
+* `ConsentGranted`
+* `ConsentDeclined`
+* `ConsentExpired`
+* `CaseSubmitted`
+* `CaseCancelled`
+
+Events are immutable and fully auditable.
+
+---
+
+## DDD Aggregate Boundaries
+
+### Interaction Aggregate
+
+**Aggregate Root:** Interaction
+
+Owns:
+
+* Interaction lifecycle
+* Transfers
+* Authority to create transactions
+
+Does not own:
+
+* Case
+* Consent
+
+---
+
+### Case Aggregate
+
+**Aggregate Root:** Case
+
+Owns:
+
+* Transaction inclusion
+* Consent
+* Submission and cancellation
+
+Guarantees:
+
+* No submission without consent
+* Immutable transaction set after submission
+
+---
+
+## Design Principles
+
+* Channel-agnostic core domain
+* Explicit separation of concerns
+* Consent-first compliance model
+* Strong auditability
+* Clear aggregate ownership
 
 ---
 
 ## Diagram Index
 
-The following diagrams accompany this README:
-
 * Conceptual Class Diagram — Interactions, Transactions, Consent, Cases
-* Call Center Sequence Diagram — Consent-Gated Case Submission
-* Branch Sequence Diagram — Consent-Gated Case Submission
-* Digital Channel Sequence Diagram — Consent-Gated Case Submission
-* Unified Activity Diagram — End-to-End Lifecycle
+* Sequence Diagrams — Call Center, Branch, Digital
+* Activity Diagram — Unified Lifecycle
+* State Diagrams — Interaction, Transaction, Consent, Case
+* Aggregate Boundary Diagram — DDD Model
 
 ---
 
-**This document is the source of truth for the Case Management System conceptual model.**
+**This document defines the authoritative conceptual and architectural model for the Case Management System.**
