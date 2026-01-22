@@ -1,0 +1,31 @@
+@startuml
+title Digital Channel — Consent-Gated Single Transaction Case
+autonumber
+
+actor Customer
+participant "Digital Interaction" as Digital
+participant "Transaction Service" as Tx
+participant "Consent Service" as Consent
+participant "Case Service" as Case
+
+Customer -> Digital : Start Session
+Customer -> Digital : Submit Transaction
+
+Digital -> Tx : Create Transaction T1
+
+== Consent Request ==
+Digital -> Customer : Display Consent Request
+Customer --> Digital : Consent Response
+
+Digital -> Consent : Record Consent
+
+alt Consent GRANTED
+  Digital -> Case : Submit Case (T1)
+  Case --> Digital : Case Ref
+  Digital -> Customer : Display Case Reference Number
+else Consent DECLINED
+  Digital -> Case : Cancel Case
+  Digital -> Customer : Display Cancellation Notice
+end
+
+@enduml

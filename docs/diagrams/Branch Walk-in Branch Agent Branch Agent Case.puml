@@ -1,0 +1,36 @@
+@startuml
+title Branch Walk-In — Consent-Gated Case Submission
+autonumber
+
+actor Customer
+participant "Branch Interaction" as Branch
+participant "Branch Agent A" as BA
+participant "Branch Agent B" as BB
+participant "Transaction Service" as Tx
+participant "Consent Service" as Consent
+participant "Case Service" as Case
+
+Customer -> Branch : Walk-in
+Branch -> BA : Assign Agent
+
+BA -> Tx : Create Transaction T1
+BA -> BB : Handover
+
+BB -> Tx : Create Transaction T2
+
+== Consent Request ==
+BB -> Customer : Request Consent
+Customer --> BB : Consent Response
+
+BB -> Consent : Record Consent
+
+alt Consent GRANTED
+  BB -> Case : Submit Case (T1, T2)
+  Case --> BB : Case Ref
+  BB -> Customer : Provide Case Reference Number
+else Consent DECLINED
+  BB -> Case : Cancel Case
+  BB -> Customer : Inform Case Cancelled
+end
+
+@enduml

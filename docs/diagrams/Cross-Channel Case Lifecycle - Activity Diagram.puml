@@ -1,0 +1,26 @@
+@startuml
+title Unified Case Lifecycle with Mandatory Consent
+
+start
+
+:Interaction Created;
+
+repeat
+  :Transaction Created;
+  :Link Transaction to Interaction;
+repeat while (More Transactions?)
+
+:Request Customer Consent;
+
+if (Consent Granted?) then (Yes)
+  :Create Case;
+  :Bundle Transactions;
+  :Submit Case;
+  :Provide Case Reference Number;
+else (No)
+  :Cancel Case;
+  :Notify Customer;
+endif
+
+stop
+@enduml

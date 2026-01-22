@@ -1,0 +1,42 @@
+@startuml
+title Call Center — Consent-Gated Case Submission
+autonumber
+
+actor Customer
+participant "IVR Interaction" as IVR
+participant "Agent Interaction (Agent A)" as AgentA
+participant "Agent Interaction (Agent B)" as AgentB
+participant "Transaction Service" as Tx
+participant "Consent Service" as Consent
+participant "Case Service" as Case
+
+== Call Initiation ==
+Customer -> IVR : Call arrives
+IVR -> AgentA : Route call
+
+== Agent A Interaction ==
+AgentA -> Tx : Create Transaction T1
+
+== Agent Transfer ==
+AgentA -> AgentB : Transfer call
+
+== Agent B Interaction ==
+AgentB -> Tx : Create Transaction T2
+
+== Consent Request ==
+AgentB -> Customer : Request Consent
+Customer --> AgentB : Consent Response
+
+AgentB -> Consent : Record Consent
+
+alt Consent GRANTED
+  == Case Submission ==
+  AgentB -> Case : Submit Case (T1, T2)
+  Case --> AgentB : Case Ref
+  AgentB -> Customer : Provide Case Reference Number
+else Consent DECLINED
+  AgentB -> Case : Cancel Case
+  AgentB -> Customer : Inform Case Cancelled
+end
+
+@enduml

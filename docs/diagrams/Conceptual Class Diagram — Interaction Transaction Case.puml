@@ -1,0 +1,97 @@
+@startuml
+title Conceptual Model — Interactions, Transactions, Consent, and Cases
+
+skinparam classAttributeIconSize 0
+
+' =======================
+' Core Abstract Concepts
+' =======================
+
+abstract class Interaction {
+  +interactionRef
+  +channel
+  +startedAt
+  +endedAt
+}
+
+class Transaction {
+  +transactionRef
+  +type
+  +status
+  +createdAt
+}
+
+class Case {
+  +caseRef
+  +status
+  +submittedAt
+}
+
+class Consent {
+  +consentRef
+  +status  <<GRANTED | DECLINED>>
+  +requestedAt
+  +respondedAt
+}
+
+' =======================
+' Assisted Interactions
+' =======================
+
+class IVRInteraction
+class AgentInteraction {
+  +agentId
+}
+
+class AgentToAgentInteraction
+
+class BranchInteraction
+class BranchAgentInteraction {
+  +agentId
+}
+
+class BranchAgentToAgentInteraction
+
+' =======================
+' Digital Interactions
+' =======================
+
+class DigitalInteraction {
+  +channelType
+}
+
+class WebInteraction
+class AppInteraction
+class WhatsAppInteraction
+
+' =======================
+' Inheritance
+' =======================
+
+Interaction <|-- IVRInteraction
+Interaction <|-- AgentInteraction
+Interaction <|-- BranchInteraction
+Interaction <|-- DigitalInteraction
+
+AgentInteraction <|-- AgentToAgentInteraction
+BranchInteraction <|-- BranchAgentInteraction
+BranchAgentInteraction <|-- BranchAgentToAgentInteraction
+
+DigitalInteraction <|-- WebInteraction
+DigitalInteraction <|-- AppInteraction
+DigitalInteraction <|-- WhatsAppInteraction
+
+' =======================
+' Relationships
+' =======================
+
+Interaction "1" --> "0..*" Transaction : initiates
+Interaction "0..1" --> "0..*" Interaction : transfers to
+
+Transaction "1..*" --> "1" Case : bundled into
+Case "1" --> "1..*" Transaction : contains
+
+Case "1" --> "1" Consent : requires
+Consent "1" --> "1" Case : authorises submission
+
+@enduml
