@@ -1,0 +1,12 @@
+@startuml
+!pragma layout smetana
+title Case State Machine
+
+[*] --> DRAFT
+DRAFT --> AWAITING_CONSENT
+AWAITING_CONSENT --> SUBMITTED
+AWAITING_CONSENT --> CANCELLED
+SUBMITTED --> [*]
+CANCELLED --> [*]
+
+@enduml

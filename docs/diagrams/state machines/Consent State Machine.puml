@@ -1,0 +1,13 @@
+@startuml
+!pragma layout smetana
+title Consent State Machine
+
+[*] --> REQUESTED
+REQUESTED --> GRANTED
+REQUESTED --> DECLINED
+REQUESTED --> EXPIRED
+GRANTED --> [*]
+DECLINED --> [*]
+EXPIRED --> [*]
+
+@enduml

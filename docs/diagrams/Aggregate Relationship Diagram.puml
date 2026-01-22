@@ -1,0 +1,20 @@
+@startuml
+!pragma layout smetana
+title DDD Aggregate Boundaries
+
+package "Interaction Aggregate" {
+  class Interaction
+  class Transaction
+  Interaction --> Transaction : creates
+}
+
+package "Case Aggregate" {
+  class Case
+  class Consent
+  Case --> Transaction : references
+  Case --> Consent : owns
+}
+
+Interaction --> Case : contributes to
+
+@enduml

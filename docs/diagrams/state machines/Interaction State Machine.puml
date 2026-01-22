@@ -1,0 +1,12 @@
+@startuml
+!pragma layout smetana
+title Interaction State Machine
+
+[*] --> STARTED
+STARTED --> IN_PROGRESS
+IN_PROGRESS --> TRANSFERRED
+IN_PROGRESS --> ENDED
+TRANSFERRED --> ENDED
+ENDED --> [*]
+
+@enduml

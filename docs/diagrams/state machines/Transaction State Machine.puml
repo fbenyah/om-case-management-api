@@ -1,0 +1,10 @@
+@startuml
+!pragma layout smetana
+title Transaction State Machine
+
+[*] --> CREATED
+CREATED --> VALIDATED
+VALIDATED --> INCLUDED_IN_CASE
+INCLUDED_IN_CASE --> [*]
+
+@enduml
