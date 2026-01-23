@@ -26,6 +26,28 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "om.servicing.casemanagement
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "om.servicing.casemanagement.core", "src\om.servicing.casemanagement.core\om.servicing.casemanagement.core.csproj", "{5284BDA2-F669-4907-BC25-913F3D85FFCB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{CE7884A9-427E-4719-BA74-723C703AAE7B}"
+	ProjectSection(SolutionItems) = preProject
+		docs\case-management-system-README.md = docs\case-management-system-README.md
+		docs\implementation-vs-concept.md = docs\implementation-vs-concept.md
+		docs\README.md = docs\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Diagrams", "Diagrams", "{4A6EC98E-28A5-44E0-98D6-70A0C0587D54}"
+	ProjectSection(SolutionItems) = preProject
+		docs\diagrams\Aggregate Relationship Diagram.puml = docs\diagrams\Aggregate Relationship Diagram.puml
+		docs\diagrams\Branch Walk-in Branch Agent Branch Agent Case.puml = docs\diagrams\Branch Walk-in Branch Agent Branch Agent Case.puml
+		docs\diagrams\Call Center IVR Agent Transfer Case Submission.puml = docs\diagrams\Call Center IVR Agent Transfer Case Submission.puml
+		docs\diagrams\state machines\Case State Machine.puml = docs\diagrams\state machines\Case State Machine.puml
+		docs\diagrams\Conceptual Class Diagram — Interaction Transaction Case.puml = docs\diagrams\Conceptual Class Diagram — Interaction Transaction Case.puml
+		docs\diagrams\Conceptual Class Diagram — Interaction Transaction Case (DOT required).puml = docs\diagrams\Conceptual Class Diagram — Interaction Transaction Case (DOT required).puml
+		docs\diagrams\state machines\Consent State Machine.puml = docs\diagrams\state machines\Consent State Machine.puml
+		docs\diagrams\Cross-Channel Case Lifecycle - Activity Diagram.puml = docs\diagrams\Cross-Channel Case Lifecycle - Activity Diagram.puml
+		docs\diagrams\Digital Channels  Web - App - WhatsApp.puml = docs\diagrams\Digital Channels  Web - App - WhatsApp.puml
+		docs\diagrams\state machines\Interaction State Machine.puml = docs\diagrams\state machines\Interaction State Machine.puml
+		docs\diagrams\state machines\Transaction State Machine.puml = docs\diagrams\state machines\Transaction State Machine.puml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +90,8 @@ Global
 		{49AEA7A2-F1D8-2D98-BF95-9EFAE78E728A} = {60138915-E8AF-439C-AB3A-8DCAA93AB5B5}
 		{302489AC-8416-D230-CACA-30E46D4D12A2} = {CA2C2E21-C117-4D18-B7B2-7D8DA01795E2}
 		{5284BDA2-F669-4907-BC25-913F3D85FFCB} = {60138915-E8AF-439C-AB3A-8DCAA93AB5B5}
+		{CE7884A9-427E-4719-BA74-723C703AAE7B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{4A6EC98E-28A5-44E0-98D6-70A0C0587D54} = {CE7884A9-427E-4719-BA74-723C703AAE7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A1DE7C94-E14D-455A-9D7D-CE61C171EC77}
