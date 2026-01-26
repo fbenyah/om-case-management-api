@@ -1,0 +1,66 @@
+@startuml
+title OM–OC Requirements to Development Process
+
+|Business|
+start
+:Define Business Need;
+:Submit High-Level Requirements;
+
+|OM Team|
+:Initial Requirement Review;
+:Clarify Scope & Objectives;
+:Assess Technical Feasibility;
+:Identify Constraints & Dependencies;
+
+|OC Team|
+:Review Requirements from Delivery Perspective;
+:Highlight Delivery Risks & Assumptions;
+
+|OM Team|
+|OC Team|
+:Joint Requirements Analysis Workshop;
+:Refine Functional & Non-Functional Requirements;
+
+|OM Team|
+|OC Team|
+:Produce Agreed Requirements Document;
+:Confirm Delivery Responsibilities;
+
+|Business|
+:Review Requirements;
+:Approve & Sign Off;
+
+if (Approved?) then (Yes)
+  |OM Team|
+  :Create Detailed Design (OM Scope);
+  
+  |OC Team|
+  :Create Detailed Design (OC Scope);
+
+  |OM Team|
+  |OC Team|
+  :Design Alignment & Technical Sign-Off;
+
+  |OM Team|
+  :Develop OM Components;
+
+  |OC Team|
+  :Develop OC Components;
+
+  |OM Team|
+  |OC Team|
+  :Integration & Joint Testing;
+
+  |Business|
+  :User Acceptance Testing;
+  :Final Acceptance;
+
+  stop
+else (No)
+  |OM Team|
+  |OC Team|
+  :Rework Requirements;
+  -> Joint Requirements Analysis Workshop;
+endif
+
+@enduml

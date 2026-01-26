@@ -1,0 +1,56 @@
+@startuml
+title OM–OC UI/UX Flow
+
+|Business|
+start
+:Define User Goals & Journeys;
+:Describe Expected User Outcomes;
+
+|OM UX Team|
+:Create High-Level User Flows;
+:Define UX Principles & Standards;
+:Align with Existing OM Platforms;
+
+|OC Team|
+:Review UX for Delivery Feasibility;
+:Propose UI Alternatives or Optimisations;
+:Estimate Effort & Risks;
+
+|OM UX Team|
+|OC Team|
+:Joint UX Review & Iteration;
+:Agree on Final User Flows;
+
+|OM UX Team|
+:Produce Wireframes & Interaction Designs;
+:Define Acceptance Criteria per Screen;
+
+|Business|
+:Review UX & Wireframes;
+:Approve & Sign Off UX;
+
+if (Approved?) then (Yes)
+  |OM Team|
+  :Build OM UI Components;
+
+  |OC Team|
+  :Build OC UI Components;
+
+  |OM UX Team|
+  |OC Team|
+  :UX Consistency Review;
+  :Accessibility & Standards Check;
+
+  |Business|
+  :User Acceptance Testing (UX Focus);
+  :Final UX Acceptance;
+
+  stop
+else (No)
+  |OM UX Team|
+  |OC Team|
+  :Refine UX Design;
+  -> Joint UX Review & Iteration;
+endif
+
+@enduml
