@@ -2,7 +2,7 @@
 title Transaction Package Processing (SRP - Bizagi -> Digital HEL 2.0)
 autonumber
 
-participant "External System" as External
+participant "External System (eg. UAW)" as External
 participant "SRP API" as SRP
 participant "DynamoDB" as DynamoDB
 participant "Processing Queue" as Queue
