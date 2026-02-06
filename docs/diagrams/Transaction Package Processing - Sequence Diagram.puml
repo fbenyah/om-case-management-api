@@ -1,0 +1,68 @@
+@startuml
+title Transaction Package Processing (SRP - Bizagi -> Digital HEL 2.0)
+autonumber
+
+participant "External System" as External
+participant "SRP API" as SRP
+participant "DynamoDB" as DynamoDB
+participant "Processing Queue" as Queue
+participant "Enrichment Service" as Enrichment
+participant "Pull Service" as Pull
+participant "Bizagi API" as Bizagi
+participant "Bizagi Failure Process" as FailureProcess
+participant "Status Queue" as StatusQueue
+participant "Status Handler" as StatusHandler
+
+== Package Submission ==
+External -> SRP : Submit Transaction Package\n(Bizagi Case Reference + Multiple Transactions)
+SRP -> SRP : Validate Package
+SRP -> DynamoDB : Save Transaction Package
+SRP -> DynamoDB : Save Individual Transactions\n(Associated to Case Reference)
+
+loop For Each Transaction
+    SRP -> Queue : Enqueue Transaction\n(Minimal Details for Processing)
+end
+
+SRP --> External : Package Submission Confirmed
+
+== Transaction Processing ==
+loop For Each Transaction in Queue
+    Queue -> Enrichment : Process Transaction
+    Enrichment -> Enrichment : Perform Enrichment Logic
+    
+    alt Enrichment Successful
+        Enrichment -> DynamoDB : Update Transaction State\n(ReadyForPull)
+
+        == Pull Mechanism ==
+        note over Enrichment : Transaction State: ReadyForPull
+        Enrichment -> Pull : Trigger Pull Process
+        Pull -> Bizagi : API Call with Minimal Details\n(Transaction ID + Case Reference)
+        
+        == Bizagi Pull Processing ==
+        alt Pull Successful
+            Bizagi -> SRP : Pull Enriched Transaction Details\n(Using Transaction ID)
+            SRP -> DynamoDB : Retrieve Full Transaction Data
+            SRP --> Bizagi : Return Enriched Transaction Details
+            
+            Bizagi -> Bizagi : Create Transaction Against\nBizagi Case Reference
+            Bizagi --> Pull : Return Transaction Reference Number
+            Pull -> DynamoDB : Update Transaction\n(Bizagi Transaction Reference)
+            
+            == Status Updates ==
+            note over Bizagi : Further Bizagi Processing
+            Bizagi -> StatusQueue : Send Status Message\n(Transaction Reference + Status)
+            
+            StatusQueue -> StatusHandler : Process Status Message
+            StatusHandler -> DynamoDB : Record Child Status\n(Against Transaction)
+        else Pull Failed
+            Pull -> FailureProcess : Send Transaction + Case Reference\nto Bizagi Failure Process
+            FailureProcess -> DynamoDB : Record Pull Failure Status
+        end
+        
+    else Enrichment Failed
+        Enrichment -> FailureProcess : Send Transaction + Case Reference\nto Bizagi Failure Process
+        FailureProcess -> DynamoDB : Record Enrichment Failure Status
+    end
+end
+
+@enduml
